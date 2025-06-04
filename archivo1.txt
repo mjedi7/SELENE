@@ -1,1 +1,2 @@
 "Este es un archivo de prueba" 
+"L¡nea nueva en archivo1" 
