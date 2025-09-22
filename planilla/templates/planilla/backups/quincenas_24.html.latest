@@ -1,0 +1,182 @@
+{% extends 'planilla/menu.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h3 class="mb-4">Consulta de Quincenas por No. de Personal</h3>
+
+    <form id="claveForm" class="mb-4">
+        <div class="form-group">
+            <label for="clave">Ingrese su No. de Personal (Clave):</label>
+            <input type="text" class="form-control" id="clave" name="clave" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Consultar</button>
+    </form>
+
+    <div id="planillaDatos" class="mt-4" style="display:none;">
+        <h5>Datos de Planilla</h5>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Clave</th>
+                    <th>Nombre</th>
+                    <th>Adscripción</th>
+                    <th>Departamento</th>
+                </tr>
+            </thead>
+            <tbody id="planillaBody"></tbody>
+        </table>
+    </div>
+
+    <div id="quincenasDatos" class="mt-4" style="display:none;">
+        <h5>Historial de Quincenas</h5>
+        <table id="quincenasTable" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+                <tr id="quincenasHeader"></tr>
+            </thead>
+            <tbody id="quincenasBody"></tbody>
+        </table>
+    </div>
+    
+	<h3>Diferencias entre quincenas</h3>
+	<table id="diferenciasTable" class="display">
+	  <thead id="diferenciasHeader"></thead>
+	  <tbody id="diferenciasBody"></tbody>
+	</table>    
+    
+</div>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    $('#claveForm').on('submit', function(e){
+        e.preventDefault();
+        const clave = $('#clave').val();
+
+        $.ajax({
+            url: "{% url 'quincenas' %}",
+            method: 'POST',
+            data: {
+                'clave': clave,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(data){
+                // Mostrar datos planilla
+                if(data.planilla){
+                    $('#planillaDatos').show();
+                    $('#planillaBody').html(`
+                        <tr>
+                            <td>${data.planilla.clave}</td>
+                            <td>${data.planilla.nombre}</td>
+                            <td>${data.planilla.adscripcion}</td>
+                            <td>${data.planilla.departamento}</td>
+                        </tr>
+                    `);
+                } else {
+                    $('#planillaDatos').hide();
+                }
+
+                // Mostrar tabla quincenas completas
+                if(data.quincenas.length > 0){
+                    $('#quincenasDatos').show();
+                    $('#quincenasHeader').empty();
+                    $('#quincenasBody').empty();
+
+                    // Columnas (sin clave)
+                    data.columns.forEach(h => {
+                        if(h !== 'clave'){
+                            $('#quincenasHeader').append(`<th>${h}</th>`);
+                        }
+                    });
+
+                    // Filas quincenas completas
+                    data.quincenas.forEach(row => {
+                        let rowHtml = '<tr>';
+                        row.forEach((cell, index) => {
+                            if(data.columns[index] !== 'clave'){
+                                rowHtml += `<td>${cell}</td>`;
+                            }
+                        });
+                        rowHtml += '</tr>';
+                        $('#quincenasBody').append(rowHtml);
+                    });
+
+                    // Init DataTable quincenas (destruye previa)
+                    if ( $.fn.dataTable.isDataTable('#quincenasTable') ) {
+                        $('#quincenasTable').DataTable().clear().destroy();
+                    }
+                    $('#quincenasTable').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                        }
+                    });
+                } else {
+                    $('#quincenasDatos').hide();
+                }
+
+                // Mostrar tabla diferencias solo cambios
+                if(data.quincenas.length > 0){
+                    $('#diferenciasDatos').show();
+                    $('#diferenciasHeader').empty();
+                    $('#diferenciasBody').empty();
+
+                    // Encabezados (sin clave)
+                    data.columns.forEach(h => {
+                        if(h !== 'clave'){
+                            $('#diferenciasHeader').append(`<th>${h}</th>`);
+                        }
+                    });
+
+// Filas con solo diferencias (comparando con fila anterior)
+let prevValues = [];
+data.quincenas.forEach(row => {
+    let rowHtml = '<tr>';
+    row.forEach((cell, index) => {
+        if(data.columns[index] !== 'clave'){
+            // Normaliza #N/D a vacío
+            if(cell === '#N/D' || cell === null) {
+                cell = '';
+            }
+            if(prevValues[index] === undefined || cell !== prevValues[index]){
+                rowHtml += `<td>${cell}</td>`;
+            } else {
+                rowHtml += `<td></td>`;
+            }
+            prevValues[index] = cell;
+        }
+    });
+    rowHtml += '</tr>';
+    $('#diferenciasBody').append(rowHtml);
+});
+
+
+                    // Init DataTable diferencias (destruye previa)
+                    if ( $.fn.dataTable.isDataTable('#diferenciasTable') ) {
+                        $('#diferenciasTable').DataTable().clear().destroy();
+                    }
+                    $('#diferenciasTable').DataTable({
+                        language: {
+                            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                        }
+                    });
+                } else {
+                    $('#diferenciasDatos').hide();
+                }
+            },
+            error: function(){
+                alert("Error al obtener los datos.");
+                $('#planillaDatos').hide();
+                $('#quincenasDatos').hide();
+                $('#diferenciasDatos').hide();
+            }
+        });
+    });
+});
+</script>
+
+
+{% endblock %}

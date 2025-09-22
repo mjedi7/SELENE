@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" class="light" data-bs-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sistema SELENE</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+
+  <style>
+    #usuario, #contrasena {
+      background-color: #faebd78a;
+    }
+
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      /* overflow: hidden; */
+    }
+
+    .video-background {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      min-width: 100%;
+      min-height: 100%;
+      z-index: -1;
+      object-fit: cover;
+      filter: blur(8px);
+      -webkit-filter: blur(8px);
+    }
+
+.login-container {
+    position: relative;
+    z-index: 1;
+    height: 100dvh; /* corrige el scroll en móviles */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    margin: 0; /* elimina márgenes */
+    padding: 0; /* elimina relleno */
+    overflow: hidden; /* asegura sin scroll */
+}
+
+    .login-box {
+      background: rgba(30, 30, 30, 0.7);
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 4px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body class="bg-dark">
+
+  <!-- Video de fondo -->
+  <video autoplay muted loop playsinline class="video-background">
+    <source src="{% static 'planilla/videos/schoolbg-low.mp4' %}" type="video/mp4">
+    Tu navegador no soporta video de fondo.
+  </video>
+
+<div class="login-container">
+    <div class="login-box">
+      <div class="text-center mb-3">
+        <h4>Iniciar Sesión</h4>
+      </div>
+
+      {% if mensaje %}
+        <div class="alert alert-danger">{{ mensaje }}</div>
+      {% endif %}
+
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="usuario" class="form-label">
+            <i class="bi bi-person-circle"></i> Usuario
+          </label>
+          <input type="text" class="form-control" id="usuario" name="usuario" required autofocus style="background-color: rgba(250, 235, 215, 0.3);">
+        </div>
+        <div class="mb-3">
+          <label for="contrasena" class="form-label">
+            <i class="bi bi-lock"></i> Contraseña
+          </label>
+          <input type="password" class="form-control" id="contrasena" name="contrasena" required style="background-color: rgba(250, 235, 215, 0.3);">
+        </div>
+        <div class="form-check mb-3">
+          <input type="checkbox" class="form-check-input" id="recordar" name="recordar">
+          <label for="recordar" class="form-check-label">Recordar usuario</label>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">
+          Ingresar <i class="bi bi-caret-right"></i>
+        </button>
+      </form>
+
+      <div class="text-center my-3">
+        <img src="{% static 'planilla/imgs/logo.png' %}" class="img-fluid" style="max-width: 60%; height: auto;" alt="Logo CECyTEV">
+      </div>
+
+      <div class="text-center text-white">
+        <small>© {{ now|date:"Y" }} CECyTEV 2025</small>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

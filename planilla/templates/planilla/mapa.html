@@ -1,0 +1,452 @@
+{% extends 'planilla/menu.html' %}
+{% block title %}Mapa CECYTEV con Tooltip{% endblock %}
+
+{% load static %}
+
+{% block extra_css %}
+
+<style>
+  #mapa {
+    max-width: 1000px;
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: auto;
+    position: relative;
+  }
+
+  #textos-mapa {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Para no interferir con los eventos del mapa */
+    color: #000;    
+  }
+
+  .texto-area {
+    position: absolute;
+    background: rgba(0, 128, 128, 0.9); /* Verde esmeralda */
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    transform: translate(-50%, -50%); /* Centrar en el área */
+    white-space: nowrap;
+  }
+
+  .tooltip {
+    position: fixed;
+    background: rgba(0, 128, 128, 0.9); /* Verde esmeralda para tooltips */
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 1.4;
+    pointer-events: none;
+    display: none;
+    z-index: 9999;
+    max-width: 800px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .tooltip.show {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .tooltip::after {
+    content: '';
+    position: absolute;
+    width: 0; 
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid rgba(0, 128, 128, 0.9); /* Actualizado a verde esmeralda */
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .tooltip .titulo { font-size: 1.1em; margin-bottom: 0.25em; }
+  .tooltip .bloque { margin-top: 0.15em; font-weight: 600; }
+  .tooltip .valor  { font-weight: 500; }
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div style="max-width: 1000px; margin: auto; position: relative;">
+  <img src="{% static 'planilla/imgs/mapa_cecytev.jpg' %}" usemap="#image-map" id="mapa">
+  
+	<div id="textos-mapa"></div> <!-- Contenedor para los textos dinámicos -->
+	  <p style="margin: 0; text-align: right;">Pasa el mouse sobre el No. de Plantel</p>
+	  <p style="margin: 0; text-align: right;">para saber más información de este.</p>
+	</div>
+	
+</div>
+
+<map name="image-map">
+  <area target="" alt="21" title="21" href="#" coords="447,104,1067,258" shape="rect">
+  <area target="" alt="13" title="13" href="#" coords="15,902,574,1061" shape="rect">
+  <area target="" alt="18" title="18" href="#" coords="1140,1077,1719,1249" shape="rect">
+  <area target="" alt="3"  title="3"  href="#" coords="321,1204,851,1338" shape="rect">
+  <area target="" alt="9"  title="9"  href="#" coords="399,1493,936,1632" shape="rect">
+  <area target="" alt="2"  title="2"  href="#" coords="1882,1709,1303,1538" shape="rect">
+  <area target="" alt="12" title="12" href="#" coords="663,1774,1226,1909" shape="rect">
+  <area target="" alt="7"  title="7"  href="#" coords="765,1917,1271,2047" shape="rect">
+  <area target="" alt="15" title="15" href="#" coords="1621,1880,2228,2011" shape="rect">
+  <area target="" alt="14" title="14" href="#" coords="1108,2125,1670,2275" shape="rect">
+  <area target="" alt="5"  title="5"  href="#" coords="1780,2023,2334,2133" shape="rect">
+  <area target="" alt="30" title="30" href="#" coords="1723,2137,2371,2275" shape="rect">
+  <area target="" alt="27" title="27" href="#" coords="1943,2288,2583,2467" shape="rect">
+  <area target="" alt="4"  title="4"  href="#" coords="1804,2471,2395,2597" shape="rect">
+  <area target="" alt="20" title="20" href="#" coords="1026,2516,1662,2663" shape="rect">
+  <area target="" alt="28" title="28" href="#" coords="2187,2683,2811,2854" shape="rect">
+  <area target="" alt="17" title="17" href="#" coords="1250,2777,1841,2940" shape="rect">
+  <area target="" alt="22" title="22" href="#" coords="2269,2858,2888,3005" shape="rect">
+  <area target="" alt="23" title="23" href="#" coords="1055,2989,1637,3115" shape="rect">
+  <area target="" alt="6"  title="6"  href="#" coords="1091,3139,1637,3286" shape="rect">
+  <area target="" alt="29" title="29" href="#" coords="1735,2956,2289,3090" shape="rect">
+  <area target="" alt="16" title="16" href="#" coords="1804,3139,2306,3274" shape="rect">
+  <area target="" alt="1"  title="1"  href="#" coords="2330,3270,2860,3433" shape="rect">
+  <area target="" alt="25" title="25" href="#" coords="2469,3437,3055,3555" shape="rect">
+  <area target="" alt="26" title="26" href="#" coords="3186,3306,3805,3461" shape="rect">
+  <area target="" alt="24" title="24" href="#" coords="3019,3620,3602,3775" shape="rect">
+  <area target="" alt="11" title="11" href="#" coords="3483,3478,4074,3620" shape="rect">
+  <area target="" alt="10" title="10" href="#" coords="3838,3645,4408,3812" shape="rect">
+  <area target="" alt="8"  title="8"  href="#" coords="3793,4354,4339,4525" shape="rect">
+  <area target="" alt="31" title="31" href="#" coords="1650,3102,1800,3102,1792,3285,1947,3293,1939,3403,1511,3416,1507,3301,1645,3293" shape="poly">
+  <area target="" alt="19" title="19" href="#" coords="3626,3831,3624,3636,3813,3640,3822,3839,3948,3848,3952,3974,3528,3966,3528,3835" shape="poly">
+</map>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/image-map-resizer/1.0.10/js/imageMapResizer.min.js"></script>
+<script>
+  // Datos por número (title/alt) -> Plantel, Tel, Director, Coord. Adm., Coord. Aca.
+  const datos = {
+    1:  { plantel:`TRES VALLES`, tel:`TEL. 01 288 885 07 48`,
+          director:`LIC. ERICK ANTONIO VAZQUEZ CANO (E.D.) CEL. (288) 119 41 90`,
+          adm:`C.P. Ma. DE JESÚS MORALES AGUILAR CEL. (288) 113 74 29`,
+          aca:`LIC. ANDREA LUCIA ROMÁN MUÑOZ CEL. (229) 438 97 18` },
+
+    2:  { plantel:`PAPANTLA`, tel:`TEL. 01 784 842 29 96`,
+          director:`ING. ROCÍO ADRIANA ROA ROMERO CEL. (784) 120 57 10`,
+          adm:`C.P. RUPERTO SIMBRÓN HERNÁNDEZ CEL. (784) 848 54 74`,
+          aca:`LIC. ANA LIZETH DONAT PAREDES CEL. (784) 104 08 87` },
+
+    3:  { plantel:`BENITO JUÁREZ`, tel:`TEL. 01 746 100 20 13`,
+          director:`ING. HÉCTOR HIRAM SORIA CUERVO CEL. (789) 106 44 79`,
+          adm:`LIC. MARISOL REYES ORTIZ CEL. (771) 161 18 99`,
+          aca:`LIC. LORENA SAGRARIO FDEZ. NAVA CEL. (789) 100 47 76` },
+
+    4:  { plantel:`NAOLINCO DE VICTORIA`, tel:`TEL. 01 279 821 57 95`,
+          director:`ING. ROBERTO ALDAIR MENDOZA MONTEZANO (E.D.) CEL. (228) 266 76 59`,
+          adm:`LIC. RAFAEL CERVANTEZ CERVANTEZ CEL. (228) 149 74 41`,
+          aca:`LIC. REYNALDO CID MARTINEZ CEL. (228) 197 29 12` },
+
+    5:  { plantel:`VEGA DE ALATORRE`, tel:`TEL. 01 235 327 0054 · TEL. 01 235 327 0846`,
+          director:`LIC. GLORIA IVETT TRONCO CARO CEL. (235) 110 61 06`,
+          adm:`LIC. EDUARDO VILLANUEVA VELAZQUEZ CEL. (229) 434 27 80`,
+          aca:`ING. REINA RIVERA QUEVEDO CEL. (235) 103 04 13` },
+
+    6:  { plantel:`HUITZILA SOLEDAD ATZOMPA`, tel:`TEL. 01 278 596 30 19`,
+          director:`LIC. SERGIO ALBERTO JUÁREZ DEL ÁNGEL CEL. (784) 117 03 10`,
+          adm:`C.P. MARINA CORTÉS BAÑUELOS CEL. (272) 191 69 45`,
+          aca:`LIC. RUTH CARPIO HERNÁNDEZ CEL. (746) 106 69 03` },
+
+    7:  { plantel:`COXQUIHUI`, tel:`TEL. 01 784 843 70 58 · TEL. 01 784 843 71 12`,
+          director:`LIC. MAURILIO ESPINOZA GUEVARA CEL. (784) 848 25 59`,
+          adm:`L.C. GABRIEL HERNÁNDEZ SANTIAGO CEL. (782) 130 28 42`,
+          aca:`LIC. MARCIAL HERNÁNDEZ VARGAS CEL. (782) 104 07 41` },
+
+    8:  { plantel:`LA LAGUNA UXPANAPA`, tel:`TEL. 01 924 219 06 05`,
+          director:`LIC. ARMANDO MONTIEL DOMÍNGUEZ CEL. (921) 143 07 30`,
+          adm:`ING. MARCOS MANUEL MALDONADO MARTÍNEZ CEL. (922) 220 11 12`,
+          aca:`LIC. JAZIEL RAMÍREZ YAÑEZ CEL. (231) 322 40 11` },
+
+    9:  { plantel:`HUAYACOCOTLA`, tel:`TEL. 01 774 758 00 57`,
+          director:`ING. OMAR OSORIO GONZALEZ CEL. (789) 109 02 26`,
+          adm:`TEC. INES ÁNGELES RAMÍREZ CEL. (771) 240 61 29`,
+          aca:`LIC. IRASEMA RAMIREZ CORTÉS CEL. (771) 793 34 74` },
+
+    10: { plantel:`AGUA DULCE`, tel:`TEL. 01 923 233 22 37`,
+          director:`DRA. MARIA ISABEL HERNANDEZ MARCELO (E.D.) CEL. (228) 102 01 12`,
+          adm:`L.C. ELSA RAMIREZ SANTAMARIA CEL. (922) 109 41 38`,
+          aca:`VALENTIN RAMIREZ MARCIAL CEL. (228) 151 61 23` },
+
+    11: { plantel:`PAJAPAN`, tel:`TEL. 01 924 264 91 44`,
+          director:`LIC. KARLA DOLORES DOMINGUEZ CEL. (228) 425 91 59`,
+          adm:`LIC. ANDRO JOTHSAN SANCHEZ FLORES CEL. (228) 324 62 21`,
+          aca:`LIC. ESTELA ALMODOVAR DE JESÚS CEL. (922) 103 75 87` },
+
+    12: { plantel:`FILOMENO MATA`, tel:`(NO HAY TELÉFONO EN PLANTEL)`,
+          director:`ING. GINO MOLINA HERNANDEZ (E.D.) CEL. (797) 977 15 51`,
+          adm:`LIC. JOSEFINA LARA JIMÉNEZ CEL. (232) 100 00 09`,
+          aca:`LIC. MIGUEL JOSÉ CRUZ GARCÍA CEL. (784) 848 77 93` },
+
+    13: { plantel:`PLATÓN SÁNCHEZ`, tel:`TEL. 01 789 895 03 97`,
+          director:`LIC. NORMA EDITH FLORES NAVARRETE CEL. (789) 103 58 68`,
+          adm:`L.A.E. LUIS ENRIQUE CONTRERAS GONZALES CEL. (765) 115 32 09`,
+          aca:`LIC. JUAN HERNANDEZ DOLORES CEL. (771) 132 86 26` },
+
+    14: { plantel:`ATZALAN`, tel:`OFICINA: 01 226 316 20 90 · PLANTEL: 01 226 316 07 03`,
+          director:`LIC. ANAYELI LANDA SUAREZ CEL. (228) 357 39 34`,
+          adm:`LIC. JUAN CARLOS GARCÍA HERNÁNDEZ CEL. (279) 112 30 01`,
+          aca:`LIC. ALONSO ORTIZ HERNANDEZ CEL. (228) 306 00 99` },
+
+    15: { plantel:`SAN RAFAEL EMILIANO ZAPATA`, tel:`TEL. 01 232 324 68 21`,
+          director:`LIC. VICTOR MANUEL HERNANDEZ HERNANDEZ (E.D.) CEL (232) 101 3470`,
+          adm:`ING. HÉCTOR CABRERA LÓPEZ CEL. (782) 829 74 60`,
+          aca:`LIC. MIRIAM PAULINA NAVARRA CASTELLANOS CEL. (228) 847 87 38` },
+
+    16: { plantel:`OMEALCA TENEJAPAN DE MATA`, tel:`TEL. 01 278 745 80 87`,
+          director:`L.E.F. ERICK SOSA GUTIERREZ CEL. (278) 104 87 55`,
+          adm:`L.A.E. JOSÉ LUIS BORGES TOLENTINO CEL. (271) 108 23 81`,
+          aca:`ING. FELIPE CRIVELLI MURILLO CEL. (272) 123 64 74` },
+
+    17: { plantel:`HUATUSCO DE CHICUELLAR`, tel:`TEL. 01 273 734 57 31`,
+          director:`ING. CÉSAR AUGUSTO URBINA REYNA CEL. (228) 159 94 13`,
+          adm:`LIC. RAFAEL RUIZ HERNÁNDEZ CEL. (229) 104 21 95`,
+          aca:`I.S.C. OSCAR MARTÍNEZ HERNÁNDEZ CEL. (235) 104 12 79` },
+
+    18: { plantel:`LA CAMELIA ÁLAMO TEMAPACHE`, tel:`TEL. 01 765 844 12 42`,
+          director:`LIC. MÓNICA GÓMEZ GUZMÁN CEL. (784) 849 81 58`,
+          adm:`LIC. JESSICA RIOS PRIOR CEL. (765) 107 21 29`,
+          aca:`ING. LAGOMAR LÓPEZ SÁNCHEZ CEL. (765) 102 56 48` },
+
+    19: { plantel:`COATZACOALCOS CIUDAD OLMECA`, tel:`TEL. 01 921 248 28 35`,
+          director:`ING. EDGAR IVAN GUTIERREZ JAIMES CEL. (922) 266 07 11`,
+          adm:`LIC. JONATHAN ISAY MORALES BORREGO CEL. (921) 213-5355`,
+          aca:`ING. GUILLERMO ARIAS CARVAJAL CEL. (921) 124 38 85` },
+
+    20: { plantel:`LAS LOMAS COATEPEC`, tel:`TEL. 01 228 129 03 47`,
+          director:`LIC. FABIOLA MARTÍNEZ RODRÍGUEZ (Encargada de Despacho) CEL. (229) 216-5396`,
+          adm:`LIC. ALEXANDER ROBLES VAZQUEZ CEL. (782) 105 66 43`,
+          aca:`ING. JOSÉ DE JESÚS JIMÉNEZ HERNÁNDEZ CEL. (228) 150 60 64` },
+
+    21: { plantel:`GUAYALEJO PÁNUCO`, tel:`TEL. 01 846 265 01 38`,
+          director:`LIC. ERICK MENENDEZ GARCIA (E.D.) CEL. (229) 174-7727`,
+          adm:`LIC. SANDRA EDITH CRESPO SALAZAR CEL. (789) 109 92 59`,
+          aca:`LIC. MARCO ANTONIO CHONTAL LEYTE CEL. (246) 299 52 36` },
+
+    22: { plantel:`MEDELLÍN DE BRAVO`, tel:`TEL. 01 285 107 10 43`,
+          director:`LIC. VICTOR OCHOA MORALES (E.D.) CEL. (229) 700 15 25`,
+          adm:`LIC. VICTOR JESUS MORALES DEL ANGEL CEL. (789) 105 22 35`,
+          aca:`LIC. MARÍA ALEJANDRA CRUZ LÓPEZ CEL. (232) 155 12 92` },
+
+    23: { plantel:`LA CUESTA CAMERINO Z. MENDOZA`, tel:`TEL. 01 272 742 71 79`,
+          director:`MTRA. TANIA MARGARITA ROSALES REYES CEL. (951) 145 99 16`,
+          adm:``, /* vacío en tu lista */
+          aca:`LIC. MAURICIO ALDARACA LÓPEZ CEL. (272) 128 31 75` },
+
+    24: { plantel:`HUAZUNTLÁN MECAYAPAN`, tel:`TEL. 01 924 219 40 73 · TEL. 01 924 219 41 01`,
+          director:`LIC. EDITH MARTÍNEZ MARTÍNEZ CEL. (924) 140 23 60`,
+          adm:`C.P. MERLE JANETH HERNÁNDEZ SÁNCHEZ CEL. (924) 143 83 84`,
+          aca:`LIC. IMARA DEL CARMEN SAGARDÍA MARES CEL. (922) 227 15 23` },
+
+    25: { plantel:`OTATITLÁN`, tel:`TEL. 01 287 876 02 04`,
+          director:`LIC. MELINA CEPEDA LÓPEZ CEL. (287) 881 05 85`,
+          adm:`LIC. LAURA GUADALUPE XILOTL ALARCÓN (228) 376 86 66`,
+          aca:`LIC. MARÍA DEL SOCORRO MONTIEL GARCÍA CEL. (229) 140 51 83` },
+
+    26: { plantel:`CATEMACO`, tel:`TEL. 01 294 943 01 64 · DIF MPAL. 01 229 943 15 19`,
+          director:`LIC. SOCRATES AGUILAR SALOMÓN (E.D.) CEL. (924) 110 55 70`,
+          adm:`LIC. BRENDA DEL CARMEN AYALA FARIAS CEL. (294) 146 70 50`,
+          aca:`LIC. ERNESTO CHONTAL AZAMAR CEL. (228) 584 41 15` },
+
+    27: { plantel:`PALMA SOLA ALTO LUCERO`, tel:`TEL. 01 296 974 09 71`,
+          director:`ING. AXEL ALBERTO TROLLE TADEO CEL. (288) 102 66 72`,
+          adm:`C.P. EVELYN GUADALUPE HERNÁNDEZ VÁZQUEZ CEL. (228) 103 97 32`,
+          aca:`LIC. GEOVANI NAVARRO MOCTEZUMA CEL. (228) 194 71 08` },
+
+    28: { plantel:`VERACRUZ (PUERTO)`, tel:`TEL. 01 229 100 56 12`,
+          director:`LIC. DANIELA LILY HERNÁNDEZ (Encargada de Despacho) CEL. (229) 106 18 10`,
+          adm:`C. ANGEL VILLACIS PALACIOS CEL. (771) 894 0071`,
+          aca:`MTRA. DEYSI MARÍA BANDA CARVAJAL CEL. (229) 250 84 68` },
+
+    29: { plantel:`YANGA GENERAL ALATRISTE`, tel:`TEL. 01 278 738 90 90`,
+          director:`LIC. ANA LILIA LEÓN TORRALBA (Encargada de Despacho) CEL. (271) 195 09 47`,
+          adm:`LIC. JUAN ALEJANDRO MESA GARCÍA CEL. (228) 266 70 37`,
+          aca:`ING. ORLANDA FUENTES ESPINOSA CEL. (278) 122 37 37` },
+
+    30: { plantel:`PALO BLANCO JUCHIQUE DE FERRER`, tel:`TEL. 01 279 832 32 03`,
+          director:`LIC. MARÍA TERESA MEZA CAICEROS CEL. (235) 100 08 92`,
+          adm:`LIC. REYNA VILLALVA VELASCO CEL. (228) 826 62 60`,
+          aca:`LIC. JOSÉ LUIS OCHOA DOMÍNGUEZ CEL. (279) 106 35 65` },
+
+    31: { plantel:`COETZALA`, tel:`(Sin línea telefónica en el plantel)`,
+          director:`PSIC. MONSERRAT MÉNDEZ CAMACHO CEL. (271) 707 20 03`,
+          adm:`L.A.E. NAZARIO FRANCISCO HERNANDEZ CEL. (951) 357 35 33`,
+          aca:`LIC. ELIZABETH MUÑOZ RIVERA CEL. (271) 709 36 54` }
+  };
+
+   const tooltip = document.createElement('div');
+  tooltip.className = 'tooltip';
+  document.body.appendChild(tooltip);
+
+  imageMapResize();
+
+  document.querySelectorAll('area').forEach(area => {
+    const key = parseInt(area.getAttribute('title') || area.getAttribute('alt'), 10);
+
+    area.addEventListener('click', e => e.preventDefault());
+
+    area.addEventListener('mouseenter', () => {
+      const info = datos[key];
+      if (!info) return;
+
+      tooltip.innerHTML = `
+        <div class="titulo">No. ${key}</div>
+        <div class="bloque">Plantel: <span class="valor">${info.plantel}</span></div>
+        <div class="bloque">Teléfono: <span class="valor">${info.tel}</span></div>
+        <div class="bloque">Director: <span class="valor">${info.director}</span></div>
+        <div class="bloque">Coord. Adm.: <span class="valor">${info.adm || '—'}</span></div>
+        <div class="bloque">Coord. Aca.: <span class="valor">${info.aca || '—'}</span></div>
+      `;
+      tooltip.classList.add('show');
+    });
+
+    area.addEventListener('mousemove', e => {
+      const padding = 10;
+      let x = e.clientX + padding;
+      let y = e.clientY + padding;
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      if (x + tooltipRect.width > window.innerWidth) x = e.clientX - tooltipRect.width - padding;
+      if (y + tooltipRect.height > window.innerHeight) y = e.clientY - tooltipRect.height - padding;
+
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+    });
+
+    area.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('show');
+    });
+  });
+  
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/image-map-resizer/1.0.10/js/imageMapResizer.min.js"></script>
+<script>
+  // Datos por número (title/alt) -> Plantel, Tel, Director, Coord. Adm., Coord. Aca.
+  const datos = {
+    1: { plantel: `TRES VALLES`, tel: `TEL. 01 288 885 07 48`, /* ... */ },
+    // ... resto de los datos ...
+  };
+
+  const tooltip = document.createElement('div');
+  tooltip.className = 'tooltip';
+  document.body.appendChild(tooltip);
+
+  const textosMapa = document.getElementById('textos-mapa');
+
+  // Función para calcular el centro de un área
+  function calcularCentro(coords, shape) {
+    const numeros = coords.split(',').map(Number);
+    let x, y;
+
+    if (shape === 'rect') {
+      // Para rectángulos: (x1,y1,x2,y2)
+      const [x1, y1, x2, y2] = numeros;
+      x = (x1 + x2) / 2;
+      y = (y1 + y2) / 2;
+    } else if (shape === 'poly') {
+      // Para polígonos: promedio de las coordenadas
+      let sumX = 0, sumY = 0, count = 0;
+      for (let i = 0; i < numeros.length; i += 2) {
+        sumX += numeros[i];
+        sumY += numeros[i + 1];
+        count++;
+      }
+      x = sumX / count;
+      y = sumY / count;
+    }
+
+    return { x, y };
+  }
+
+  // Generar textos para cada área
+  document.querySelectorAll('area').forEach(area => {
+    const key = parseInt(area.getAttribute('title') || area.getAttribute('alt'), 10);
+    const coords = area.getAttribute('coords');
+    const shape = area.getAttribute('shape');
+
+    // Crear elemento de texto
+    const texto = document.createElement('div');
+    texto.className = 'texto-area';
+    texto.textContent = key; // Mostrar el número del plantel
+    textosMapa.appendChild(texto);
+
+    // Posicionar el texto en el centro del área
+    const { x, y } = calcularCentro(coords, shape);
+    texto.style.left = `${x}px`;
+    texto.style.top = `${y}px`;
+
+    // Eventos existentes para tooltips
+    area.addEventListener('click', e => e.preventDefault());
+
+    area.addEventListener('mouseenter', () => {
+      const info = datos[key];
+      if (!info) return;
+
+      tooltip.innerHTML = `
+        <div class="titulo">No. ${key}</div>
+        <div class="bloque">Plantel: <span class="valor">${info.plantel}</span></div>
+        <div class="bloque">Teléfono: <span class="valor">${info.tel}</span></div>
+        <div class="bloque">Director: <span class="valor">${info.director}</span></div>
+        <div class="bloque">Coord. Adm.: <span class="valor">${info.adm || '—'}</span></div>
+        <div class="bloque">Coord. Aca.: <span class="valor">${info.aca || '—'}</span></div>
+      `;
+      tooltip.classList.add('show');
+    });
+
+    area.addEventListener('mousemove', e => {
+      const padding = 10;
+      let x = e.clientX + padding;
+      let y = e.clientY + padding;
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      if (x + tooltipRect.width > window.innerWidth) x = e.clientX - tooltipRect.width - padding;
+      if (y + tooltipRect.height > window.innerHeight) y = e.clientY - tooltipRect.height - padding;
+
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+    });
+
+    area.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('show');
+    });
+  });
+
+  // Ajustar textos al redimensionar la imagen
+  function ajustarTextos() {
+    const mapa = document.getElementById('mapa');
+    const escalaX = mapa.width / mapa.naturalWidth;
+    const escalaY = mapa.height / mapa.naturalHeight;
+
+    document.querySelectorAll('.texto-area').forEach(texto => {
+      const x = parseFloat(texto.style.left) * escalaX;
+      const y = parseFloat(texto.style.top) * escalaY;
+      texto.style.left = `${x}px`;
+      texto.style.top = `${y}px`;
+    });
+  }
+
+  // Llamar a imageMapResizer y ajustar textos
+  imageMapResize();
+  ajustarTextos();
+  window.addEventListener('resize', ajustarTextos);
+</script>
+
+{% endblock %}

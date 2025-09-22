@@ -1,0 +1,1 @@
+"C:\Program Files\PostgreSQL\17\bin\pg_dump.exe" -h localhost -U postgres  -F c -b -v -f ".\todos_trabajadores.backup" todos_trabajadores

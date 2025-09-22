@@ -1,0 +1,158 @@
+{% extends 'planilla/menu.html' %}
+
+{% block title %}Estadísticas - Planilla{% endblock %}
+
+{% block content %}
+<div class="container mt-4" id="tablaComparaPlazas">
+  <h2>Estadísticas de la Planilla</h2>
+  <hr>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card text-white bg-primary mb-3">
+        <div class="card-header">Total de Trabajadores</div>
+        <div class="card-body">
+          <h3 class="card-title">{{ total_trabajadores }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card text-white bg-success mb-3">
+        <div class="card-header">Puestos Únicos</div>
+        <div class="card-body">
+          <h3 class="card-title">{{ puestos_unicos }}</h3>
+        </div>
+      </div>
+    </div>
+    
+<div class="col-md-6">
+  <div class="card text-dark bg-warning mb-3">
+    <div class="card-header">Categorías sin Trabajadores</div>
+    <div class="card-body">
+      <h3 class="card-title">{{ puestos_sin_ocupar }}</h3>
+    </div>
+  </div>
+</div>
+
+    
+  </div>
+
+  <h4 class="mt-5">Conteo por Puesto</h4>
+    
+<table id="tablaEstadisticas" class="table table-bordered table-striped mt-3">
+  <thead class="table-dark">
+    <tr>
+      <th>Puesto</th>
+      <th>Cantidad Planilla</th>
+      <th>Diferencia</th>
+      <th>Cantidad Plazas</th>
+      <th>Coincide en Plazas</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in conteo_y_coincidencia %}
+    <tr>
+      <td>{{ item.puesto }}</td>
+      <td>{{ item.cantidad_planilla }}</td>
+      <td>{{ item.cantidad_plazas }}</td>
+      <td>{{ item.diferencia }}</td>
+      <td>
+        {% if item.coincide %}
+          ✅
+        {% else %}
+          ❌
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+    
+
+    
+  <h4 class="mt-5">Gráfica de Puestos</h4>
+  
+  	<button id="cambiarTipoBtn" class="btn btn-primary btn-sm mb-2">
+		<i class="bi bi-pie-chart"></i>
+		Cambiar tipo de gráfica
+	</button>    
+  
+  <div style="height: 900px;">
+    <canvas id="graficaPuestos"></canvas>
+  </div>
+  
+
+
+  <!-- CDN de Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const ctx = document.getElementById('graficaPuestos').getContext('2d');
+
+const data = {
+  labels: {{ puestos_labels|safe }},
+  datasets: [{
+    label: 'Cantidad por Puesto',
+    data: {{ puestos_data|safe }},
+    backgroundColor: [
+      'rgba(255, 165, 0, 0.7)',  // naranja
+      'rgba(255, 99, 132, 0.7)', // rojo
+      'rgba(75, 192, 192, 0.7)', // aqua
+      'rgba(153, 102, 255, 0.7)', // morado
+      'rgba(255, 206, 86, 0.7)', // amarillo
+      'rgba(54, 162, 235, 0.7)', // azul
+      'rgba(201, 203, 207, 0.7)' // gris
+    ],
+    borderColor: 'white',
+    borderWidth: 1
+  }]
+};
+
+let currentType = 'doughnut';
+
+const config = {
+  type: currentType,
+  data: data,
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'left' },
+      tooltip: { mode: 'nearest', intersect: false }
+    }
+  }
+};
+
+let chart = new Chart(ctx, config);
+
+// Cambiar tipo al vuelo
+document.getElementById('cambiarTipoBtn').addEventListener('click', function() {
+  chart.destroy(); // Destruye la instancia actual
+  currentType = (currentType === 'doughnut') ? 'bar' : 'doughnut';
+  chart = new Chart(ctx, {
+    type: currentType,
+    data: data,
+    options: config.options
+  });
+});
+</script>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+$(document).ready(function() {
+    $('#tablaEstadisticas').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json"
+        },
+        "paging": false,
+        "pageLength": 25,
+        "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "Todos"] ],
+        "ordering": true,
+        "responsive": true
+    });
+});
+</script>
+
+{% endblock %}

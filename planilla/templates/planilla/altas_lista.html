@@ -1,0 +1,52 @@
+{% extends 'planilla/menu.html' %}
+{% block title %}Altas del Mes{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Altas del Mes Actual</h2>
+
+  {% if altas %}
+    <table id="altasTable" class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>Adscripción</th>
+          <th>Departamento</th>
+          <th>Clave</th>
+          <th>RFC</th>
+          <th>CURP</th>
+          <th>Puesto</th>
+          <th>Fecha de Ingreso</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alta in altas %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ alta.nombre }}</td>
+            <td>{{ alta.adscripcion }}</td>
+            <td>{{ alta.departamento }}</td>
+            <td>{{ alta.clave }}</td>
+            <td>{{ alta.rfc }}</td>
+            <td>{{ alta.curp }}</td>
+            <td>{{ alta.puesto }}</td>
+            <td>{{ alta.fecha_de_ingreso|date:"d/m/Y" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-info">
+      No se encontraron altas en el mes actual.
+    </div>
+  {% endif %}
+</div>
+
+<!-- Opcional: Activa DataTables -->
+<script>
+  $(document).ready(function() {
+    $('#altasTable').DataTable();
+  });
+</script>
+{% endblock %}

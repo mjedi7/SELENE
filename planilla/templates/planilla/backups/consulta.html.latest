@@ -1,0 +1,121 @@
+{% extends 'planilla/menu.html' %}
+{% block title %}Consulta de Empleado{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <h3 class="text-center mb-4">Consulta por Clave de Empleado</h3>
+
+  <!-- Formulario de búsqueda -->
+  <form method="GET" action="{% url 'consulta' %}" class="row g-3 mb-4 justify-content-center">
+    <div class="col-md-4">
+      <label for="clave" class="form-label">Clave de Empleado</label>
+      <input type="text" class="form-control" id="clave" name="clave" placeholder="Ej. 2726" required>
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+      <button type="submit" class="btn btn-primary w-100">Buscar</button>
+    </div>
+  </form>
+
+  {% if empleado %}
+    <form method="POST" action="{% url 'consulta' %}" class="card">
+      {% csrf_token %}
+      <div class="card-header bg-success text-white">
+        Datos del Empleado
+      </div>
+      <div class="card-body">
+        <div class="row g-2">
+
+          <div class="col-md-3">
+            <label class="form-label fw-bold">No:</label>
+            <input type="text" class="form-control" value="{{ empleado.no }}" disabled>
+            <input type="hidden" name="no" value="{{ empleado.no }}">
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label fw-bold">Nombre:</label>
+            {% if autorizacion_usuario == 'lector' %}
+              <input type="text" class="form-control" value="{{ empleado.nombre }}" disabled>
+            {% else %}
+              <input type="text" class="form-control" name="nombre" value="{{ empleado.nombre }}" required>
+            {% endif %}
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Adscripción:</label>
+            {% if autorizacion_usuario == 'lector' %}
+              <input type="text" class="form-control" value="{{ empleado.adscripcion }}" disabled>
+            {% else %}
+              <input type="text" class="form-control" name="adscripcion" value="{{ empleado.adscripcion }}" required>
+            {% endif %}
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Departamento:</label>
+            <input type="text" class="form-control" value="{{ empleado.departamento }}" disabled>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Clave:</label>
+            <input type="text" class="form-control" value="{{ empleado.clave }}" disabled>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">RFC:</label>
+            {% if autorizacion_usuario == 'lector' %}
+              <input type="text" class="form-control" value="{{ empleado.rfc }}" disabled>
+            {% else %}
+              <input type="text" class="form-control" name="rfc" value="{{ empleado.rfc }}" required>
+            {% endif %}
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">CURP:</label>
+            {% if autorizacion_usuario == 'lector' %}
+              <input type="text" class="form-control" value="{{ empleado.curp }}" disabled>
+            {% else %}
+              <input type="text" class="form-control" name="curp" value="{{ empleado.curp }}" required>
+            {% endif %}
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Puesto:</label>
+            <input type="text" class="form-control" value="{{ empleado.puesto }}" disabled>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Sindicato:</label>
+            {% if autorizacion_usuario == 'lector' %}
+              <input type="text" class="form-control" value="{{ empleado.sindicato }}" disabled>
+            {% else %}
+              <input type="text" class="form-control" name="sindicato" value="{{ empleado.sindicato }}" required>
+            {% endif %}
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Fecha de Ingreso:</label>
+            {% if autorizacion_usuario == 'lector' %}
+              <input type="date" class="form-control" value="{{ empleado.fecha_de_ingreso|date:'Y-m-d' }}" disabled>
+            {% else %}
+              <input type="date" class="form-control" name="fecha_de_ingreso" value="{{ empleado.fecha_de_ingreso|date:'Y-m-d' }}" required>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+      {% if autorizacion_usuario != 'lector' %}
+        <div class="card-footer text-end">
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-save"></i> Guardar Cambios
+          </button>
+        </div>
+      {% endif %}
+    </form>
+
+  {% elif clave_busqueda %}
+    <div class="alert alert-danger mt-4">
+      No se encontró ningún empleado con la clave <strong>{{ clave_busqueda }}</strong>.
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

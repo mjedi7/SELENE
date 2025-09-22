@@ -1,0 +1,37 @@
+{% extends 'planilla/menu.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Lista de Todos los Trabajadores Dados de Baja</h3>
+
+    {% if trabajadores %}
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="thead-dark">
+            <tr>
+                <th>Clave</th>
+                <th>Nombre</th>
+                <th>Adscripción</th>
+                <th>Departamento</th>
+                <th>Puesto</th>
+                <th>RFC</th>
+                <th>CURP</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in trabajadores %}
+            <tr>
+                <td>{{ t.clave }}</td>
+                <td>{{ t.nombre }}</td>
+                <td>{{ t.adscripcion }}</td>
+                <td>{{ t.departamento }}</td>
+                <td>{{ t.puesto }}</td>
+                <td>{{ t.rfc }}</td>
+                <td>{{ t.curp }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="mt-3">No hay trabajadores dados de baja registrados.</p>
+    {% endif %}
+</div>
+{% endblock %}

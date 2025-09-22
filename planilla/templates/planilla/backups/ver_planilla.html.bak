@@ -1,0 +1,159 @@
+{% extends 'planilla/menu.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2 class="mb-4">Listado de Todos los Trabajadores</h2>
+
+
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <label for="buscarClave" class="form-label">Buscar por Clave:</label>
+            <input type="text" id="buscarClave" class="form-control" placeholder="Ingrese clave...">
+        </div>
+        <div class="col-md-5">
+            <label for="buscarNombre" class="form-label">Buscar por Nombre:</label>
+            <input type="text" id="buscarNombre" class="form-control" placeholder="Ingrese nombre...">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button id="filtrarBaja" class="btn btn-warning w-100">Mostrar solo trabajadores de baja</button>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button id="resetFiltros" class="btn btn-secondary w-100">Resetear filtros</button>
+        </div>
+    </div>
+
+    <!-- Contenedor -->
+    <div class="table-responsive" style="overflow-x: auto; white-space: nowrap;">
+        <table id="tablaPlanilla" class="table table-striped table-bordered table-sm" style="width:100%">
+            <thead class="table-dark">
+                <tr>
+                    <th>Datos</th>
+                    <th>Clave</th>
+                    <th>Nombre</th>
+                    <th>Departamento</th>
+                    <th>Puesto</th>
+                    <th>Fecha Ingreso</th>
+                    <th>CURP</th>
+                    <th>NSS</th>
+                    <th>RFC</th>
+                    <th>Sindicalizado</th>
+                    <th>Activo</th>
+                    <th>Baja</th>
+                    <th>Quincenas c/base</th>
+                    <th>Nombramiento</th>
+                    <th>Último Categoría</th>
+                    <th>Último Nombr.</th>
+                    <th>Firma Nombr.</th>
+                    <th>Fecha Lic.</th>
+                    <th>Motivo Lic.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in trabajadores %}
+                <tr>
+                    <td>
+                        <button class="btn btn-primary btn-sm ver-datos">Ver datos</button>
+                    </td>
+                    <td>{{ t.clave }}</td>
+                    <td>{{ t.nombre }}</td>
+                    <td>{{ t.departamento }}</td>
+                    <td>{{ t.puesto }}</td>
+                    <td>{{ t.fecha_inicio_rel_laboral }}</td>
+                    <td>{{ t.curp }}</td>
+                    <td>{{ t.nss }}</td>
+                    <td>{{ t.rfc }}</td>
+                    <td>{{ t.sindicalizado }}</td>
+                    <td>{{ t.activo }}</td>
+                    <td>{{ t.baja }}</td>
+                    <td>{{ t.quincenas_como_base }}</td>
+                    <td>{{ t.nombramiento_si_no }}</td>
+                    <td>{{ t.categoria_ultimo_nombramiento }}</td>
+                    <td>{{ t.fecha_ultimo_nombramiento }}</td>
+                    <td>{{ t.firma_ultimo_nombramiento }}</td>
+                    <td>{{ t.fecha_licencia }}</td>
+                    <td>{{ t.motivo_licencia }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="modalTrabajador" tabindex="-1" aria-labelledby="modalTrabajadorLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="modalTrabajadorLabel">Datos del trabajador</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered table-sm" id="modalDatos">
+
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+    var tabla = $('#tablaPlanilla').DataTable({
+        "pageLength": 8,
+        "scrollX": true,
+        "autoWidth": false,
+        "deferRender": true,
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+        }
+    });
+
+    // Filtro por clave (col 1)
+    $('#buscarClave').on('keyup change', function () {
+        tabla.column(1).search(this.value).draw();
+    });
+
+    // Filtro por nombre (col 2)
+    $('#buscarNombre').on('keyup change', function () {
+        tabla.column(2).search(this.value).draw();
+    });
+
+    // Filtro por trabajadores de baja (columna "Activo" = NO, col 10)
+    $('#filtrarBaja').on('click', function () {
+        tabla.column(10).search('^NO$', true, false).draw();
+    });
+
+    // Botón para resetear todos los filtros
+    $('#resetFiltros').on('click', function() {
+        $('#buscarClave').val('');
+        $('#buscarNombre').val('');
+        tabla.columns().search('').draw();
+        tabla.page('first').draw('page'); // vuelve a la primera página
+    });
+
+    // Modal tipo tabla 2 columnas
+    $('#tablaPlanilla tbody').on('click', '.ver-datos', function () {
+        var fila = $(this).closest('tr');
+        var datos = tabla.row(fila).data();
+        var columnas = tabla.columns().header().toArray().map(h => $(h).text());
+
+        var contenido = "";
+        columnas.forEach((col, i) => {
+            if (col !== "Datos") {
+                contenido += `<tr><th style="width: 30%">${col}</th><td>${datos[i] ?? ""}</td></tr>`;
+            }
+        });
+
+        $("#modalDatos").html(contenido);
+        var modal = new bootstrap.Modal(document.getElementById('modalTrabajador'));
+        modal.show();
+    });
+});
+</script>
+{% endblock %}

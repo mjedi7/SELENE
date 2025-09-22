@@ -1,0 +1,167 @@
+{% extends 'planilla/menu.html' %}
+{% block title %}Plantilla de Trabajadores CECyTEV{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+<style>
+html, body {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+}
+
+.dataTables_wrapper {
+    width: 100% !important;
+}
+
+table.dataTable {
+    width: 100% !important;
+}
+
+.dataTables_wrapper .dataTables_scroll {
+    overflow-x: auto;
+}
+</style>
+
+<div class="container-fluid mt-2">
+    <div class="text-center">
+        <h3 class="mb-3">Plantilla de Trabajadores CECyTEV (Junio 2025)</h3>
+    </div>
+
+    <div class="d-flex align-items-end flex-wrap gap-2 mb-3 px-2">
+        <div>
+            <label for="columnaSelect" class="form-label mb-0">Buscar en la columna:</label>
+            <select id="columnaSelect" class="form-select form-select-sm">
+                <option value="-1">Todas las columnas</option>
+                <option value="1">Nombre</option>
+                <option value="2">Adscripción</option>
+                <option value="3">Departamento</option>
+                <option value="4">Clave</option>
+                <option value="5">RFC</option>
+                <option value="6">CURP</option>
+                <option value="7">Puesto</option>
+                <option value="8">Fecha de Ingreso</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="busquedaInput" class="form-label mb-0">Buscar texto:</label>
+            <input type="text" id="busquedaInput" class="form-control form-control-sm" placeholder="Especifico...">
+        </div>
+
+        <div class="ms-auto">
+            <button id="resetBtn" class="btn btn-secondary btn-sm">
+                <i class="bi bi-arrow-counterclockwise"></i> Reiniciar filtros
+            </button>
+        </div>
+    </div>
+
+    <div class="table-responsive px-0">
+        <table id="tabla" class="table table-bordered table-striped w-100">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nombre <i class="bi bi-person-down"></i></th>
+                    <th>Adscripción <i class="bi bi-bucket"></i></th>
+                    <th>Departamento</th>
+                    <th>#</th>
+                    <th>RFC</th>
+                    <th>CURP</th>
+                    <th>Puesto</th>
+                    <th>Fecha de Ingreso</th>
+                    		
+                    {% if autorizacion_usuario != 'consultor' %}
+						<th>Acciones</th>
+					{% endif %}
+					
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for fila in datos %}
+                <tr>
+                    <td>{{ fila.no }}</td>
+                    <td>{{ fila.nombre }}</td>
+                    <td>{{ fila.adscripcion }}</td>
+                    <td>{{ fila.departamento }}</td>
+                    <td>{{ fila.clave }}</td>
+                    <td>{{ fila.rfc }}</td>
+                    <td>{{ fila.curp }}</td>
+                    <td>{{ fila.puesto }}</td>
+                    <td>{{ fila.fecha_de_ingreso|date:"Y-m-d" }}</td>
+
+         <!-- IMPORTANTE -->           
+		{% if autorizacion_usuario != 'consultor' %}
+		            <td>
+						<button class="btn btn-danger btn-eliminar" data-id="{{ fila.no }}">Eliminar</button>
+		            </td>
+		{% endif %}
+		
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    var table = $('#tabla').DataTable({
+        language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+        dom: 'Blfrtip',
+        responsive: true,
+        autoWidth: false,
+        scrollX: true,
+        scrollCollapse: true,
+        pageLength: 8,
+        lengthMenu: [5, 8, 10, 25, 50, 100, 300, 500],
+        stateSave: true,
+        buttons: [
+            { extend: 'print', text: '<i class="bi bi-printer"></i> Imprimir', className: 'btn btn-primary' },
+            { extend: 'excelHtml5', text: '<i class="bi bi-file-earmark-excel"></i> Exportar a Excel', className: 'btn btn-success' },
+            { extend: 'pdfHtml5', text: '<i class="bi bi-file-earmark-pdf"></i> Exportar a PDF', className: 'btn btn-danger', orientation: 'landscape', pageSize: 'A4' },
+            { extend: 'colvis', text: '<i class="bi bi-eye"></i> Mostrar columnas', className: 'btn btn-secondary' }
+        ]
+    });
+
+    $('#busquedaInput').on('keyup change', function () {
+        var columna = parseInt($('#columnaSelect').val());
+        var texto = $(this).val();
+        if (columna === -1) {
+            table.columns().search('');
+            table.search(texto).draw();
+        } else {
+            table.search('');
+            table.columns().search('');
+            table.column(columna).search(texto).draw();
+        }
+    });
+
+    $('#resetBtn').on('click', function () {
+        $('#busquedaInput').val('');
+        $('#columnaSelect').val('-1');
+        table.search('').columns().search('').draw();
+    });
+});
+</script>
+{% endblock %}

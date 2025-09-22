@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html lang="es" class="dark" data-bs-theme="dark">
+
+<head>
+{% load static %}
+
+    <meta charset="UTF-8">
+    
+    <title>Plantilla de Trabajadores CECyTEV</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+   
+    <!--
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	-->    
+    
+    <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+    
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}" >
+    
+    
+<style>
+/* Color naranja del boton de cambio entre claro-oscuro */
+  .btn-orange {
+    background-color: orange;
+    color: white;
+  }
+/* Color verde al pasar el ratón del boton de cambio entre claro-oscuro */  
+  .btn-orange:hover {
+    background-color: Coral;
+    color: white;
+  }
+</style>    
+    
+</head>
+
+<body>
+
+<div class="container mt-4">
+
+	<!-- Imagenes estaticas -->
+	<div class="text-center">
+	
+		<img src="{% static 'planilla/imgs/cecytev-logos.png' %}" alt="Logo CECyTEV" />
+
+		<!-- Título de la página -->
+		<h1 class="mb-4">Plantilla de Trabajadores CECyTEV (Abril 2025)</h1>
+    
+	</div>
+    
+	<!-- Botón para cambiar entre tema oscuro o claro, posición temporal
+	<button id="toggleThemeBtn" class="btn btn-primary mb-3">Cambiar modo claro/oscuro</button>
+	 -->
+	 
+	  <button id="toggleThemeBtn" class="btn btn-orange btn-sm mb-3">Cambiar modo claro/oscuro</button>
+	    
+<table id="tabla" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Nombre</th>
+            <th>Adscripción</th>
+            <th>Departamento</th>
+            <th>Clave</th>
+            <th>RFC</th>
+            <th>CURP</th>
+            <th>Puesto</th>
+            <th>Fecha de Ingreso</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>No</th>
+            <th>Nombre</th>
+            <th>Adscripción</th>
+            <th>Departamento</th>
+            <th>Clave</th>
+            <th>RFC</th>
+            <th>CURP</th>
+            <th>Puesto</th>
+            <th>Fecha de Ingreso</th>
+        </tr>
+    </tfoot>
+    <tbody>
+        {% for fila in datos %}
+        <tr>
+            <td>{{ fila.no }}</td>
+            <td>{{ fila.nombre }}</td>
+            <td>{{ fila.adscripcion }}</td>
+            <td>{{ fila.departamento }}</td>
+            <td>{{ fila.clave }}</td>
+            <td>{{ fila.rfc }}</td>
+            <td>{{ fila.curp }}</td>
+            <td>{{ fila.puesto }}</td>
+            <td>{{ fila.fecha_de_ingreso|date:"Y-m-d" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<!-- CSS de DataTables y Botones -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
+<!-- jQuery y JS de DataTables -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+
+<!-- Inicialización con botones -->
+
+<script>
+$(document).ready(function () {
+    // Agrega inputs en cada columna del footer antes de inicializar
+    $('#tabla tfoot th').each(function () {
+        var title = $(this).text();
+        $(this).html('<input type="text" class="form-control form-control-sm" placeholder="Buscar ' + title + '" />');
+    });
+
+    // Inicializa DataTable
+    var table = $('#tabla').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+        },
+        dom: 'Blfrtip',
+        buttons: [
+            {
+                extend: 'print',
+                text: '<i class="bi bi-printer"></i> Imprimir',
+                className: 'btn btn-primary'
+            },
+            {
+                extend: 'excelHtml5',
+                text: '<i class="bi bi-file-earmark-excel"></i> Exportar a Excel',
+                className: 'btn btn-success'
+            },
+            {
+                extend: 'pdfHtml5',
+                text: '<i class="bi bi-file-earmark-pdf"></i> Exportar a PDF',
+                className: 'btn btn-danger',
+                orientation: 'landscape',
+                pageSize: 'A4'
+            },
+            {
+                extend: 'colvis',
+                text: '<i class="bi bi-eye"></i> Mostrar columnas',
+                className: 'btn btn-secondary'
+            }
+        ],
+        columnDefs: [
+            { targets: [2], visible: true } // Adscripción
+        ]
+    });
+
+    // Aplica búsqueda por columna
+    table.columns().every(function () {
+        var that = this;
+        $('input', this.footer()).on('keyup change clear', function () {
+            if (that.search() !== this.value) {
+                that.search(this.value).draw();
+            }
+        });
+    });
+});
+</script>
+
+
+<!-- Cambiar entre tema oscuro o claro -->
+<script>
+  $(document).ready(function() {
+    $('#miTabla').DataTable();
+
+    const htmlElem = document.documentElement; // el <html>
+    const btn = document.getElementById('toggleThemeBtn');
+
+    btn.addEventListener('click', () => {
+      if (htmlElem.classList.contains('dark')) {
+        // quitar modo oscuro
+        htmlElem.classList.remove('dark');
+        htmlElem.removeAttribute('data-bs-theme');
+      } else {
+        // poner modo oscuro
+        htmlElem.classList.add('dark');
+        htmlElem.setAttribute('data-bs-theme', 'dark');
+      }
+    });
+  });
+</script>
+<!-- Fin cambiar entre tema oscuro o claro -->
+
+</body>
+</html>

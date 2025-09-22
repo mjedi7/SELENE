@@ -1,0 +1,101 @@
+{% extends 'planilla/menu.html' %}
+{% load static %}
+{% load diccionarios %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Buscar Quincenas</h2>
+
+    <!-- Formulario para ingresar clave -->
+<form method="get" action="{% url 'buscar_quincenas' %}" class="mb-3" style="max-width: 400px;">
+    <div class="input-group">
+        <input type="text" name="clave" placeholder="Clave trabajador" class="form-control" value="{{ request.GET.clave }}">
+        <button type="submit" name="modo" value="completo" class="btn btn-primary">Buscar por Clave</button>
+        <button type="submit" name="modo" value="solo_quincenas" class="btn btn-secondary">Solo Quincenas</button>
+    </div>
+</form>
+
+	
+
+    <!-- Datos del trabajador -->
+    <h4>Datos del Trabajador</h4>
+
+		{% if trabajador %}
+		<table class="table table-striped table-bordered" style="max-width: 600px;">
+			<tbody>
+				<tr>
+					<th scope="row">Nombre</th>
+					<td>{{ trabajador.nombre }}</td>
+				</tr>
+				<tr>
+					<th scope="row">Adscripción</th>
+					<td>{{ trabajador.adscripcion }}</td>
+				</tr>
+				<tr>
+					<th scope="row">Fecha de ingreso</th>
+					<td>{{ trabajador.fecha_de_ingreso }}</td>
+				</tr>
+				<tr>
+					<th scope="row">Situación administrativa</th>
+					<td>{{ trabajador.situacion_adm }}</td>
+				</tr>
+			</tbody>
+		</table>
+		{% else %}
+		<p>No se encontró el trabajador.</p>
+		{% endif %}
+
+	{% if mensaje %}
+		<div class="alert alert-warning mt-3">{{ mensaje }}</div>
+	{% endif %}
+
+    <!-- Quincenas -->
+    <h4>Quincenas</h4>
+    {% if quincenas %}
+        <table id="tablaQuincenas" class="table table-striped table-bordered w-100">
+            <thead>
+                <tr>
+                    {% for col in columnas %}
+                        <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for fila in quincenas %}
+                    <tr>
+                        {% for col in columnas %}
+                            {% with valor=fila|get_item:col %}
+                                {% if valor %}
+                                    <td>{{ valor }}</td>
+                                {% else %}
+                                    <td></td>
+                                {% endif %}
+                            {% endwith %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay cambios en quincenas.</p>
+    {% endif %}
+</div>
+
+<!-- DataTables CSS y JS opcional -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#tablaQuincenas').DataTable({
+            paging: false,
+            searching: false,
+            info: false,
+            scrollX: true,
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+            }
+        });
+    });
+</script>
+{% endblock %}

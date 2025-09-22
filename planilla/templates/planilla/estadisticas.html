@@ -1,0 +1,152 @@
+{% extends 'planilla/menu.html' %}
+
+{% block title %}Estadísticas - Planilla{% endblock %}
+
+{% block content %}
+<div class="container mt-4" id="tablaComparaPlazas">
+  <h2>Estadísticas de la Planilla</h2>
+  <hr>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card text-white bg-primary mb-3">
+        <div class="card-header">Total de Trabajadores</div>
+        <div class="card-body">
+          <h3 class="card-title">{{ total_trabajadores }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card text-white bg-success mb-3">
+        <div class="card-header">Puestos Únicos</div>
+        <div class="card-body">
+          <h3 class="card-title">{{ puestos_unicos }}</h3>
+        </div>
+      </div>
+    </div>
+    
+<div class="col-md-6">
+  <div class="card text-dark bg-warning mb-3">
+    <div class="card-header">Categorías sin Trabajadores</div>
+    <div class="card-body">
+      <h3 class="card-title">{{ puestos_sin_ocupar }}</h3>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  <h4 class="mt-5">Conteo por Puesto</h4>
+    
+<table id="tablaEstadisticas" class="table table-bordered table-striped mt-3">
+  <thead class="table-dark">
+    <tr>
+      <th>Puesto</th>
+      <th>Cantidad Planilla</th>
+      <th>Diferencia</th>
+      <th>Cantidad Plazas</th>
+      <th>Coincide en Plazas</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in conteo_y_coincidencia %}
+    <tr>
+      <td>{{ item.puesto }}</td>
+      <td>{{ item.cantidad_planilla }}</td>
+      <td>{{ item.cantidad_plazas }}</td>
+      <td>{{ item.diferencia }}</td>
+      <td>
+        {% if item.coincide %}
+          ✅
+        {% else %}
+          ❌
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+    
+<h4 class="mt-5">Gráfica de Puestos</h4>
+  
+  <div class="row mt-4">
+    <div class="col-md-12">
+        <!-- Gráfica -->
+        <div id="graficaPuestos" style="width: 100%; height: 900px;"></div>
+    </div>
+    <div class="col-md-6">
+        <!-- Lista de categorías con cantidad -->
+        <h5>Categorías y Cantidades</h5>
+        <ul class="list-group list-group-flush small">
+            {% for item in puestos_lista %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ item.label }}
+                <span class="badge bg-primary rounded-pill">{{ item.cantidad }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+
+<!-- ECharts -->
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+
+<script>
+const chart = echarts.init(document.getElementById('graficaPuestos'));
+
+const option = {
+  tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
+  series: [{
+    name: 'Cantidad por Puesto',
+    type: 'pie',
+    radius: ['40%', '70%'], // Doughnut
+    center: ['50%', '50%'],
+    data: {{ puestos_data|safe }}.map((value, index) => ({
+      value: value,
+      name: {{ puestos_labels|safe }}[index]
+    })),
+    emphasis: {
+      itemStyle: {
+        shadowBlur: 10,
+        shadowOffsetX: 0,
+        shadowColor: 'rgba(0, 0, 0, 0.5)'
+      }
+    }
+  }]
+};
+
+chart.setOption(option);
+
+window.addEventListener('resize', function () {
+  chart.resize();
+});
+
+document.addEventListener("visibilitychange", function() {
+  if (!document.hidden) {
+    chart.resize();
+  }
+});
+</script>
+
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+$(document).ready(function() {
+    $('#tablaEstadisticas').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json"
+        },
+        "paging": false,
+        "pageLength": 25,
+        "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "Todos"] ],
+        "ordering": true,
+        "responsive": true
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends 'planilla/menu.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+
+  html, body {
+    overflow-x: scroll !important; /* fuerza la barra horizontal siempre visible */
+    overflow-y: auto;              /* scroll vertical normal */
+  }
+
+  /* Resaltar columna "Nombre Beneficiario" al pasar el mouse */
+  #tablaBeneficiarios tr:hover td:nth-child(6),
+  #tablaBeneficiarios tr:hover th:nth-child(6) {
+    background-color: #fdf500;
+    color: #007;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  /* Ancho mínimo solo para esas columnas largas (vía clases) */
+  #tablaBeneficiarios th.col-nombre-trabajador,
+  #tablaBeneficiarios td.col-nombre-trabajador {
+    min-width: 280px;
+    white-space: normal;
+    word-break: break-word;
+  }
+  #tablaBeneficiarios th.col-nombre-beneficiario,
+  #tablaBeneficiarios td.col-nombre-beneficiario {
+    min-width: 360px;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* === Barra horizontal SIEMPRE en toda la página === */
+  html, body {
+    overflow-x: scroll !important;  /* fuerza mostrar barra horizontal en la página */
+    overflow-y: auto;
+  }
+
+  /* Asegura que la tabla sea más ancha que el viewport para que haya desplazamiento */
+  #tablaBeneficiarios {
+    min-width: 2200px;  /* ajusta este valor a tu gusto */
+  }
+</style>
+
+<div class="container mt-4">
+  <h4>Búsqueda de Beneficiarios por Clave de Trabajador</h4>
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <input type="text" id="claveInput" class="form-control" placeholder="Ingrese clave del trabajador">
+    </div>
+    <div class="col-md-2">
+      <button id="buscarBtn" class="btn btn-primary">Buscar</button>
+    </div>
+    <div class="col-md-2">
+      <button id="resetBtn" class="btn btn-secondary">Reiniciar búsqueda</button>
+    </div>
+  </div>
+
+  <table id="tablaBeneficiarios" class="table table-striped table-bordered w-100">
+    <thead>
+      <tr>
+        <th>Nombre Trabajador</th><th>Departamento</th><th>Puesto</th><th>Clave</th><th>Sindicato</th>
+        <th>Nombre Beneficiario</th><th>Banco</th><th>Cuenta Deposito</th>
+        <th>%1</th><th>%2</th><th>%3</th><th>%4</th><th>Cant. Fija</th>
+        <th>Notas 1</th><th>Notas 2</th><th>Notas 3</th><th>Notas 4</th>
+        <th>No Expediente</th><th>No Oficio</th><th>Fecha Documento</th><th>Lugar Documento</th>
+        <th>Resolución</th><th>% Oscar</th><th>Soporte</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function() {
+  // Inicializar DataTable SIN scrollX, para que el scroll sea el de la página
+  var tabla = $('#tablaBeneficiarios').DataTable({
+    ajax: {
+      url: "{% url 'beneficiarios_trabajador_json' %}",
+      type: "GET",
+      dataSrc: "data",
+      error: function() { alert('Error al cargar datos iniciales.'); }
+    },
+    columns: [
+      { data: 'nombre_trabajador', className: 'col-nombre-trabajador' },
+      { data: 'departamento' },
+      { data: 'puesto' },
+      { data: 'clave' },
+      { data: 'sindicato' },
+      { data: 'nombre_beneficiario', className: 'col-nombre-beneficiario' },
+      { data: 'banco' },
+      { data: 'cuenta_deposito' },
+      { data: 'porcentaje_1' },
+      { data: 'porcentaje_2' },
+      { data: 'porcentaje_3' },
+      { data: 'porcentaje_4' },
+      { data: 'cantidad_fija' },
+      { data: 'notas_1' },
+      { data: 'notas_2' },
+      { data: 'notas_3' },
+      { data: 'notas_4' },
+      { data: 'no_expediente' },
+      { data: 'no_oficio' },
+      { data: 'fecha_documento' },
+      { data: 'lugar_documento' },
+      { data: 'resolucion' },
+      { data: 'porcentaje_oscar' },
+      { data: null } // Soporte (PDF)
+    ],
+    columnDefs: [{
+      targets: -1, orderable: false, searchable: false,
+      render: function(data, type, row) {
+        if (!row.clave) return '';
+        var url = '/media/pension/' + row.clave + '.pdf';
+        return '<button class="btn btn-sm btn-danger btn-pdf" data-url="' + url + '">Ver PDF</button>';
+      }
+    }],
+    autoWidth: false,
+    deferRender: true
+  });
+
+  // Botón PDF
+  $('#tablaBeneficiarios').on('click', '.btn-pdf', function() {
+    var url = $(this).data('url');
+    window.open(url, '_blank');
+  });
+
+  // Búsqueda por clave
+  function buscarClave() {
+    var clave = $('#claveInput').val().trim();
+    if (!clave) { alert('Ingrese una clave.'); return; }
+
+    $.ajax({
+      url: "{% url 'beneficiarios_trabajador_json' %}",
+      type: "POST",
+      data: { 'clave': clave, 'csrfmiddlewaretoken': '{{ csrf_token }}' },
+      success: function(response) {
+        tabla.clear().rows.add(response.data).draw();
+        if (response.mensaje) alert(response.mensaje);
+      },
+      error: function() { alert('Error al buscar datos.'); }
+    });
+  }
+
+  // Eventos
+  $('#buscarBtn').click(buscarClave);
+  $('#claveInput').keypress(function(e) { if (e.which === 13) buscarClave(); });
+  $('#resetBtn').click(function() {
+    $('#claveInput').val('');
+    tabla.ajax.reload();
+    $('#claveInput').focus();
+  });
+});
+</script>
+
+{% endblock %}

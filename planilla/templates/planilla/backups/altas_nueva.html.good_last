@@ -1,0 +1,332 @@
+{% extends 'planilla/menu.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4 text-center">Alta Nueva (Campos con * obligatorios)</h2>
+  <form id="formularioAlta" novalidate>
+
+    <div class="row g-3">
+      <!-- Nombre y Apellidos -->
+      <div class="col-md-4">
+        <label for="nombre" class="form-label">Nombre propio *</label>
+        <input type="text" class="form-control" id="nombre" name="nombre" required>
+        <div class="invalid-feedback">Este campo es obligatorio.</div>
+      </div>
+      <div class="col-md-4">
+        <label for="apellido_paterno" class="form-label">Apellido Paterno *</label>
+        <input type="text" class="form-control" id="apellido_paterno" name="apellido_paterno" required>
+        <div class="invalid-feedback">Este campo es obligatorio.</div>
+      </div>
+      <div class="col-md-4">
+        <label for="apellido_materno" class="form-label">Apellido Materno *</label>
+        <input type="text" class="form-control" id="apellido_materno" name="apellido_materno" required>
+        <div class="invalid-feedback">Este campo es obligatorio.</div>
+      </div>
+
+      <!-- RFC -->
+      <div class="col-md-4">
+        <label for="rfc" class="form-label">RFC *</label>
+        <input type="text" class="form-control" id="rfc" name="rfc" required>
+        <div class="invalid-feedback">RFC inválido.</div>
+      </div>
+
+      <!-- CURP -->
+      <div class="col-md-4">
+        <label for="curp" class="form-label">CURP *</label>
+        <input type="text" class="form-control" id="curp" name="curp" required>
+        <div class="invalid-feedback">CURP inválido.</div>
+      </div>
+
+      <!-- NSS -->
+      <div class="col-md-4">
+        <label for="nss" class="form-label">Número de Seguro Social (NSS) *</label>
+        <input type="text" class="form-control" id="nss" name="nss" required>
+        <div class="invalid-feedback">El NSS debe contener exactamente 11 dígitos.</div>
+      </div>
+
+      <!-- Fechas -->
+      <div class="col-md-4">
+        <label for="fecha_ingreso" class="form-label">Fecha de Ingreso *</label>
+        <input type="date" class="form-control" id="fecha_ingreso" name="fecha_ingreso" required>
+        <div class="invalid-feedback">Este campo es obligatorio.</div>
+      </div>
+      <div class="col-md-4">
+        <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento *</label>
+        <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" required onchange="calcularEdad()">
+        <div class="invalid-feedback">Este campo es obligatorio.</div>
+      </div>
+      <div class="col-md-1">
+        <label class="form-label">Edad</label>
+        <input type="text" class="form-control" id="edad" name="edad" readonly>
+      </div>
+      
+      <div class="col-md-3">
+        <label for="sexo" class="form-label">Sexo</label>
+        <select class="form-select" id="sexo" name="sexo">
+          <option value="">Seleccione</option>
+          <option value="M">Masculino (Hombre)</option>
+          <option value="F">Femenino (Mujer)</option>
+        </select>
+      </div>      
+
+      <!-- Plantel -->
+      <div class="col-md-6">
+        <label for="plantel" class="form-label">Plantel *</label>
+        <select class="form-select" id="plantel" name="plantel" required>
+          <option value="">Seleccione un plantel</option>
+          <option value="TRES VALLES">TRES VALLES</option>
+          <option value="PAPANTLA">PAPANTLA</option>
+          <option value="BENITO JUAREZ">BENITO JUAREZ</option>
+          <option value="NAOLINCO">NAOLINCO</option>
+          <option value="VEGA DE ALATORRE">VEGA DE ALATORRE</option>
+          <option value="HUITZILA">HUITZILA</option>
+          <option value="COXQUIHUI">COXQUIHUI</option>
+          <option value="LA LAGUNA">LA LAGUNA</option>
+          <option value="HUAYACOCOTLA">HUAYACOCOTLA</option>
+          <option value="AGUA DULCE">AGUA DULCE</option>
+          <option value="PAJAPAN">PAJAPAN</option>
+          <option value="FILOMENO MATA">FILOMENO MATA</option>
+          <option value="PLATON SANCHEZ">PLATON SANCHEZ</option>
+          <option value="ATZALAN">ATZALAN</option>
+          <option value="SAN RAFAEL">SAN RAFAEL</option>
+          <option value="OMEALCA">OMEALCA</option>
+          <option value="HUATUSCO">HUATUSCO</option>
+          <option value="LA CAMELIA">LA CAMELIA</option>
+          <option value="COATZACOALCOS">COATZACOALCOS</option>
+          <option value="LAS LOMAS">LAS LOMAS</option>
+          <option value="GUAYALEJO">GUAYALEJO</option>
+          <option value="MEDELLIN">MEDELLIN</option>
+          <option value="LA CUESTA">LA CUESTA</option>
+          <option value="HUAZUNTLAN">HUAZUNTLAN</option>
+          <option value="OTATITLAN">OTATITLAN</option>
+          <option value="CATEMACO">CATEMACO</option>
+          <option value="PALMA SOLA">PALMA SOLA</option>
+          <option value="VERACRUZ">VERACRUZ</option>
+          <option value="YANGA">YANGA</option>
+          <option value="PALO BLANCO">PALO BLANCO</option>
+          <option value="COETZALA">COETZALA</option>
+        </select>
+        <div class="invalid-feedback">Seleccione un plantel.</div>
+      </div>
+
+      <!-- Categoría -->
+      <div class="col-md-6">
+        <label for="categoria" class="form-label">Categoría *</label>
+        <select class="form-select" id="categoria" name="categoria" required>
+          <option value="">Seleccione una categoría</option>
+          <option value="COORDINADOR ACADÉMICO">COORDINADOR ACADÉMICO</option>
+          <option value="DIRECTOR DE ÁREA">DIRECTOR DE ÁREA</option>
+          <option value="DIRECTOR DE PLANTEL A">DIRECTOR DE PLANTEL A</option>
+          <option value="DIRECTOR DE PLANTEL B">DIRECTOR DE PLANTEL B</option>
+          <option value="DIRECTOR GENERAL">DIRECTOR GENERAL</option>
+          <option value="JEFE DE DEPARTAMENTO">JEFE DE DEPARTAMENTO</option>
+          <option value="SUBDIRECTOR DE PLANTEL C">SUBDIRECTOR DE PLANTEL C</option>
+          <option value="ADMINISTRATIVO ESPECIALIZADO">ADMINISTRATIVO ESPECIALIZADO</option>
+          <option value="ALMACENISTA">ALMACENISTA</option>
+          <option value="ANALISTA ESPECIALIZADO">ANALISTA ESPECIALIZADO</option>
+          <option value="AUXILIAR DE SERVICIOS Y MANTTO.">AUXILIAR DE SERVICIOS Y MANTTO.</option>
+          <option value="BIBLIOTECARIO">BIBLIOTECARIO</option>
+          <option value="CAPTURISTA">CAPTURISTA</option>
+          <option value="COOR. DE TÉCNICOS ESPECIALIZADOS">COOR. DE TÉCNICOS ESPECIALIZADOS</option>
+          <option value="ENCARGADO DE ORDEN">ENCARGADO DE ORDEN</option>
+          <option value="ENFERMERA">ENFERMERA</option>
+          <option value="INGENIERO EN SISTEMAS">INGENIERO EN SISTEMAS</option>
+          <option value="JEFE DE OFICINA">JEFE DE OFICINA</option>
+          <option value="LABORATORISTA">LABORATORISTA</option>
+          <option value="OFICIAL DE MANTENIMIENTO">OFICIAL DE MANTENIMIENTO</option>
+          <option value="PROGRAMADOR">PROGRAMADOR</option>
+          <option value="SECRETARIA DE DIRECTOR DE ÁREA">SECRETARIA DE DIRECTOR DE ÁREA</option>
+          <option value="SECRETARIA DE DIRECTOR DE PLANTEL">SECRETARIA DE DIRECTOR DE PLANTEL</option>
+          <option value="SECRETARIA DE DIRECTOR GENERAL">SECRETARIA DE DIRECTOR GENERAL</option>
+          <option value="SUPERVISOR">SUPERVISOR</option>
+          <option value="TAQUIMECANÓGRAFA">TAQUIMECANÓGRAFA</option>
+          <option value="TÉCNICO ESPECIALIZADO">TÉCNICO ESPECIALIZADO</option>
+          <option value="TRABAJADORA SOCIAL">TRABAJADORA SOCIAL</option>
+          <option value="VIGILANTE">VIGILANTE</option>
+          <option value="PROF. CECYT I">PROF. CECYT I</option>
+          <option value="PROF. CECYT I (APOYO DOCENCIA) ASOCIADO B MT">PROF. CECYT I (APOYO DOCENCIA) ASOCIADO B MT</option>
+          <option value="PROF. CECYT I (APOYO DOCENCIA) ASOCIADO B TC">PROF. CECYT I (APOYO DOCENCIA) ASOCIADO B TC</option>
+          <option value="PROF. CECYT I (APOYO DOCENCIA) ASOCIADO B TT">PROF. CECYT I (APOYO DOCENCIA) ASOCIADO B TT</option>
+          <option value="PROF. CECYT II">PROF. CECYT II</option>
+          <option value="PROF. CECYT II (APOYO DOCENCIA) ASOCIADO C MT">PROF. CECYT II (APOYO DOCENCIA) ASOCIADO C MT</option>
+          <option value="PROF. CECYT II (APOYO DOCENCIA) ASOCIADO C TC">PROF. CECYT II (APOYO DOCENCIA) ASOCIADO C TC</option>
+          <option value="PROF. CECYT II (APOYO DOCENCIA) ASOCIADO C TT">PROF. CECYT II (APOYO DOCENCIA) ASOCIADO C TT</option>
+          <option value="PROF. CECYT III">PROF. CECYT III</option>
+          <option value="PROF. CECYT III (APOYO DOCENCIA) TITULAR A MT">PROF. CECYT III (APOYO DOCENCIA) TITULAR A MT</option>
+          <option value="PROF. CECYT III (APOYO DOCENCIA) TITULAR A TC">PROF. CECYT III (APOYO DOCENCIA) TITULAR A TC</option>
+          <option value="PROF. CECYT III (APOYO DOCENCIA) TITULAR A TT">PROF. CECYT III (APOYO DOCENCIA) TITULAR A TT</option>
+          <option value="PROF. CECYT IV">PROF. CECYT IV</option>
+          <option value="PROF. CECYT IV (APOYO DOCENCIA) TITULAR B MT">PROF. CECYT IV (APOYO DOCENCIA) TITULAR B MT</option>
+          <option value="PROF. CECYT IV (APOYO DOCENCIA) TITULAR B TC">PROF. CECYT IV (APOYO DOCENCIA) TITULAR B TC</option>
+          <option value="PROF. CECYT IV (APOYO DOCENCIA) TITULAR B TT">PROF. CECYT IV (APOYO DOCENCIA) TITULAR B TT</option>
+        </select>
+        <div class="invalid-feedback">Seleccione una categoría.</div>
+      </div>
+
+      <!-- Otros campos (ejemplo: no_personal, sindicalizado, sexo, domicilio, cp, email, tipo_plaza) -->
+
+
+      <div class="col-md-6">
+        <label for="domicilio" class="form-label">Domicilio</label>
+        <input type="text" class="form-control" id="domicilio" name="domicilio">
+      </div>
+      <div class="col-md-2">
+        <label for="cp" class="form-label">Código Postal</label>
+        <input type="text" class="form-control" id="cp" name="cp">
+      </div>
+      
+      <div class="col-md-4">
+        <label for="email" class="form-label">E-MAIL</label>
+        <input type="email" class="form-control" id="email" name="email">
+      </div>      
+
+      <div class="col-md-1">
+        <label for="no_personal" class="form-label">No. Personal</label>
+        <input type="text" class="form-control" id="no_personal" name="no_personal">
+      </div>
+      <div class="col-md-2">
+        <label for="sindicalizado" class="form-label">Sindicalizado</label>
+        <select class="form-select" id="sindicalizado" name="sindicalizado">
+          <option value="">Seleccione</option>
+          <option value="Sindicalizado">Sindicalizado</option>
+          <option value="No Sindicalizado">No Sindicalizado</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label for="tipo_plaza" class="form-label">Base/Confianza/Eventual</label>
+        <select class="form-select" id="tipo_plaza" name="tipo_plaza">
+          <option value="">Seleccione</option>
+          <option value="Base">Base</option>
+          <option value="Confianza">Confianza</option>
+          <option value="Eventual">Eventual</option>
+        </select>
+      </div>
+      
+            <!-- Campo Soporte -->
+ <div class="col-md-4">
+  <label for="soporte" class="form-label">Soporte</label>
+  <div class="input-group">
+    <span class="input-group-text">SEV/SEMSYS/CECYTEV/</span>
+    <input type="text" class="form-control" id="soporte" name="soporte" maxlength="20" required>
+  </div>
+</div>
+
+
+    </div>
+
+    <!-- Botones -->
+    <div class="mt-4 d-flex justify-content-end gap-2">
+      <a href="{% url 'planilla' %}" class="btn btn-secondary">Cancelar</a>
+      <button type="reset" class="btn btn-warning">Borrar contenido</button>
+      <button type="submit" class="btn btn-primary" id="guardarBtn" disabled>Guardar Nuevo</button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+// Cálculo de edad
+function calcularEdad() {
+  const fecha = document.getElementById('fecha_nacimiento').value;
+  if (fecha) {
+    const hoy = new Date();
+    const nacimiento = new Date(fecha);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
+    document.getElementById('edad').value = edad;
+  } else {
+    document.getElementById('edad').value = '';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const rfc = document.getElementById('rfc');
+  const curp = document.getElementById('curp');
+  const nss = document.getElementById('nss');
+  const formulario = document.getElementById('formularioAlta');
+  const guardarBtn = document.getElementById('guardarBtn');
+
+  // Expresiones regulares para validación
+  const regexRFC = /^[A-ZÑ&]{3,4}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[A-Z\d]{3}$/i;
+  const regexCURP = /^[A-Z]{4}\d{6}[HM](AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/i;
+  const regexNSS = /^\d{11}$/;
+
+  function validarCampo(campo, regex) {
+    const val = campo.value.trim();
+    if (val === '') {
+      campo.classList.remove('is-invalid');
+      campo.classList.remove('is-valid');
+      return false;
+    }
+    if (regex.test(val.toUpperCase())) {
+      campo.classList.remove('is-invalid');
+      campo.classList.add('is-valid');
+      return true;
+    } else {
+      campo.classList.add('is-invalid');
+      campo.classList.remove('is-valid');
+      return false;
+    }
+  }
+
+  function validarNSS(campo) {
+    const val = campo.value.trim();
+    if (val === '') {
+      campo.classList.remove('is-invalid');
+      campo.classList.remove('is-valid');
+      return false;
+    }
+    if (regexNSS.test(val)) {
+      campo.classList.remove('is-invalid');
+      campo.classList.add('is-valid');
+      return true;
+    } else {
+      campo.classList.add('is-invalid');
+      campo.classList.remove('is-valid');
+      return false;
+    }
+  }
+
+  // Validar en vivo mientras se escribe
+  rfc.addEventListener('input', () => {
+    validarCampo(rfc, regexRFC);
+    activarBotonGuardar();
+  });
+
+  curp.addEventListener('input', () => {
+    validarCampo(curp, regexCURP);
+    activarBotonGuardar();
+  });
+
+  nss.addEventListener('input', () => {
+    validarNSS(nss);
+    activarBotonGuardar();
+  });
+
+  // Función para activar o desactivar el botón guardar
+  function activarBotonGuardar() {
+    const camposRequeridos = ['nombre', 'apellido_paterno', 'apellido_materno', 'fecha_ingreso', 'fecha_nacimiento', 'plantel', 'categoria'];
+    const todosLlenos = camposRequeridos.every(id => {
+      const campo = document.getElementById(id);
+      return campo && campo.value.trim() !== '';
+    });
+    const rfcValido = validarCampo(rfc, regexRFC);
+    const curpValido = validarCampo(curp, regexCURP);
+    const nssValido = validarNSS(nss);
+
+    guardarBtn.disabled = !(todosLlenos && rfcValido && curpValido && nssValido);
+  }
+
+  // Validar todos los campos al cargar la página para estado inicial
+  activarBotonGuardar();
+
+  // Validar edad cuando cambia fecha de nacimiento
+  document.getElementById('fecha_nacimiento').addEventListener('change', calcularEdad);
+
+  // Validar edad al cargar (por si hay valor prellenado)
+  calcularEdad();
+
+});
+</script>
+{% endblock %}

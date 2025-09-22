@@ -1,0 +1,141 @@
+<script>
+/* Calcula automáticamente la edad al cambiar la fecha de nacimiento */
+function calcularEdad() {
+    const fecha = document.getElementById('fecha_nacimiento').value;
+    if (fecha) {
+        const hoy = new Date();
+        const nacimiento = new Date(fecha);
+        let edad = hoy.getFullYear() - nacimiento.getFullYear();
+        const mes = hoy.getMonth() - nacimiento.getMonth();
+        if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
+        document.getElementById('edad').value = edad;
+    } else {
+        document.getElementById('edad').value = '';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const guardarBtn = document.getElementById('guardarBtn');
+    const rfc = document.getElementById('rfc');
+    const curp = document.getElementById('curp');
+    const nss = document.getElementById('nss');
+    const email = document.getElementById('email');
+    const telefono = document.getElementById('telefono');
+    const cpInput = document.getElementById('cp');
+    const sexo = document.getElementById('sexo');
+    const cartillaContainer = document.getElementById('cartillaContainer');
+
+    /* Expresiones regulares para validaciones */
+    const regexRFC = /^[A-ZÑ&]{3,4}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[A-Z\d]{3}$/i;
+    const regexCURP = /^[A-Z]{4}\d{6}[HM](AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS)[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/i;
+    const regexNSS = /^\d{11}$/;
+    const regexTelefono = /^\d{10}$/;
+    const regexCLABE = /^\d{18}$/;
+
+    /* Mostrar/ocultar Cartilla Militar según sexo */
+    sexo.addEventListener('change', function () {
+        if (sexo.value === 'M') {
+            cartillaContainer.classList.remove('d-none');
+            document.getElementById('cartilla').required = true;
+        } else {
+            cartillaContainer.classList.add('d-none');
+            document.getElementById('cartilla').required = false;
+            document.getElementById('cartilla').value = '';
+        }
+    });
+
+    /* Validación de campos específicos */
+    function validarCampo(campo, regex) {
+        const val = campo.value.trim();
+        if (val === '') {
+            campo.classList.remove('is-valid', 'is-invalid');
+            return false;
+        }
+        if (regex.test(val.toUpperCase())) {
+            campo.classList.remove('is-invalid');
+            campo.classList.add('is-valid');
+            return true;
+        } else {
+            campo.classList.remove('is-valid');
+            campo.classList.add('is-invalid');
+            return false;
+        }
+    }
+
+    /* Validación email por HTML5 */
+    function validarEmail() {
+        if (email.value.trim() === '') {
+            email.classList.remove('is-valid', 'is-invalid');
+            return false;
+        }
+        if (email.checkValidity()) {
+            email.classList.remove('is-invalid');
+            email.classList.add('is-valid');
+            return true;
+        } else {
+            email.classList.remove('is-valid');
+            email.classList.add('is-invalid');
+            return false;
+        }
+    }
+
+    /* Validación del CP */
+    cpInput.addEventListener('input', () => {
+        const valor = cpInput.value.trim();
+        if (/^\d{5}$/.test(valor)) {
+            cpInput.classList.remove('is-invalid');
+            cpInput.classList.add('is-valid');
+        } else {
+            cpInput.classList.remove('is-valid');
+            cpInput.classList.add('is-invalid');
+        }
+    });
+
+    /* Validación de todo el formulario antes de habilitar el botón */
+    function validarFormulario() {
+        const camposRequeridos = ['nombre', 'apellido_paterno', 'apellido_materno', 'fecha_ingreso', 'fecha_nacimiento', 'plantel', 'categoria'];
+        const camposValidos = camposRequeridos.every(id => {
+            const campo = document.getElementById(id);
+            return campo && campo.value.trim() !== '' && campo.checkValidity();
+        });
+
+        const rfcValido = validarCampo(rfc, regexRFC);
+        const curpValido = validarCampo(curp, regexCURP);
+        const nssValido = validarCampo(nss, regexNSS);
+        const emailValido = validarEmail();
+        const telefonoValido = validarCampo(telefono, regexTelefono);
+
+        const clabe = document.getElementById('clabe');
+        const cuenta = document.getElementById('cuenta');
+        const banco = document.getElementById('banco');
+        const clabeValida = clabe.value.trim() === '' || regexCLABE.test(clabe.value.trim());
+        const cuentaValida = cuenta.value.trim() === '' || cuenta.value.trim().length >= 6;
+        const bancoValido = banco.value.trim() === '' || banco.value.trim().length >= 3;
+
+        // Habilitar botón solo si TODO es válido
+        guardarBtn.disabled = !(camposValidos && rfcValido && curpValido && nssValido && emailValido && telefonoValido && clabeValida && cuentaValida && bancoValido);
+    }
+
+    // Eventos en tiempo real para validar campos
+    ['rfc', 'curp', 'nss', 'email', 'telefono', 'clabe', 'cuenta', 'banco'].forEach(id => {
+        const campo = document.getElementById(id);
+        campo.addEventListener('input', validarFormulario);
+        campo.addEventListener('change', validarFormulario);
+    });
+
+    ['nombre', 'apellido_paterno', 'apellido_materno', 'fecha_ingreso', 'fecha_nacimiento', 'plantel', 'categoria'].forEach(id => {
+        const campo = document.getElementById(id);
+        campo.addEventListener('input', validarFormulario);
+        campo.addEventListener('change', validarFormulario);
+    });
+
+    document.getElementById('fecha_nacimiento').addEventListener('change', () => {
+        calcularEdad();
+        validarFormulario();
+    });
+
+    calcularEdad();
+    validarFormulario();
+});
+</script>

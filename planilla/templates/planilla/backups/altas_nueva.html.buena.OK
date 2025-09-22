@@ -1,0 +1,255 @@
+{% extends 'planilla/menu.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Alta Nueva</h2>
+
+  <form id="altaForm">
+    <div class="row g-3">
+
+      <!-- Nombre propio -->
+      <div class="col-md-4">
+        <label class="form-label">Nombre propio *</label>
+        <input type="text" class="form-control" id="nombre" required>
+      </div>
+
+      <!-- Apellidos -->
+      <div class="col-md-4">
+        <label class="form-label">Apellido Paterno *</label>
+        <input type="text" class="form-control" id="apellido_paterno" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Apellido Materno *</label>
+        <input type="text" class="form-control" id="apellido_materno" required>
+      </div>
+
+      <!-- RFC -->
+      <div class="col-md-4">
+        <label class="form-label">RFC *</label>
+        <input type="text" class="form-control" id="rfc" required>
+      </div>
+
+      <!-- CURP -->
+      <div class="col-md-4">
+        <label class="form-label">CURP *</label>
+        <input type="text" class="form-control" id="curp" required>
+      </div>
+
+      <!-- NSS -->
+      <div class="col-md-4">
+        <label class="form-label">Número de Seguro Social (NSS) *</label>
+        <input type="text" class="form-control" id="nss" required>
+      </div>
+
+      <!-- Fecha Ingreso -->
+      <div class="col-md-4">
+        <label class="form-label">Fecha de Ingreso *</label>
+        <input type="date" class="form-control" id="fecha_ingreso" required>
+      </div>
+
+      <!-- Fecha de nacimiento y edad -->
+      <div class="col-md-4">
+        <label class="form-label">Fecha de Nacimiento *</label>
+        <input type="date" class="form-control" id="fecha_nacimiento" required onchange="calcularEdad()">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Edad</label>
+        <input type="text" class="form-control" id="edad" readonly>
+      </div>
+
+      <!-- Plantel -->
+      <div class="col-md-6">
+        <label class="form-label">Plantel *</label>
+        <select class="form-select" id="plantel" required>
+          <option value="" selected disabled>Seleccione un plantel</option>
+          {% for p in planteles %}
+            <option>{{ p }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Categoría -->
+      <div class="col-md-6">
+        <label class="form-label">Categoría *</label>
+        <select class="form-select" id="categoria" required>
+          <option value="" selected disabled>Seleccione una categoría</option>
+          {% for c in categorias %}
+            <option>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- No. de Personal -->
+      <div class="col-md-4">
+        <label class="form-label">No. de Personal</label>
+        <input type="text" class="form-control" id="no_personal">
+      </div>
+
+      <!-- Sindicalizado -->
+      <div class="col-md-4">
+        <label class="form-label">Sindicalizado</label>
+        <select class="form-select" id="sindicalizado">
+          <option value="Sí">Sindicalizado</option>
+          <option value="No">No Sindicalizado</option>
+        </select>
+      </div>
+
+      <!-- Sexo -->
+      <div class="col-md-4">
+        <label class="form-label">Sexo</label>
+        <select class="form-select" id="sexo">
+          <option value="Femenino">Femenino</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+
+      <!-- Domicilio -->
+      <div class="col-md-6">
+        <label class="form-label">Domicilio</label>
+        <input type="text" class="form-control" id="domicilio">
+      </div>
+
+      <!-- Código Postal -->
+      <div class="col-md-3">
+        <label class="form-label">Código Postal</label>
+        <input type="text" class="form-control" id="cp">
+      </div>
+
+      <!-- Email -->
+      <div class="col-md-3">
+        <label class="form-label">Correo Electrónico</label>
+        <input type="email" class="form-control" id="email">
+      </div>
+
+      <!-- Tipo -->
+      <div class="col-md-6">
+        <label class="form-label">Base/Confianza/Eventual</label>
+        <select class="form-select" id="tipo_empleado">
+          <option value="Base">Base</option>
+          <option value="Confianza">Confianza</option>
+          <option value="Eventual">Eventual</option>
+        </select>
+      </div>
+
+    </div>
+
+    <!-- Botones -->
+    <div class="mt-4">
+      <a href="{% url 'planilla' %}" class="btn btn-secondary">Cancelar</a>
+      <button type="reset" class="btn btn-warning">Borrar Contenido</button>
+      <button type="submit" class="btn btn-primary" id="guardarBtn" disabled>Guardar Nuevo</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  function calcularEdad() {
+    const fecha = document.getElementById('fecha_nacimiento').value;
+    if (!fecha) return;
+    const hoy = new Date();
+    const nacimiento = new Date(fecha);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+    document.getElementById('edad').value = edad;
+  }
+
+  const camposObligatorios = [
+    'nombre', 'apellido_paterno', 'apellido_materno',
+    'rfc', 'curp', 'nss', 'fecha_ingreso',
+    'fecha_nacimiento', 'plantel', 'categoria'
+  ];
+
+  const form = document.getElementById('altaForm');
+  const guardarBtn = document.getElementById('guardarBtn');
+
+  form.addEventListener('input', () => {
+    const validos = camposObligatorios.every(id => {
+      const el = document.getElementById(id);
+      return el && el.value.trim() !== '';
+    });
+    guardarBtn.disabled = !validos;
+  });
+</script>
+
+<script>
+  // Expresiones regulares
+	const rfcRegex = /^([A-ZÑ&]{3,4}) ?(?:- ?)?(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])) ?(?:- ?)?([A-Z\d]{2})([A\d])$/;
+	const curpRegex = /^[A-Z][AEIOU][A-Z]{2}\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[HM][A-Z]{2}[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d$/;
+	const nssRegex = /^\d{11}$/;
+
+  // RFC
+  document.getElementById('rfc').addEventListener('input', function () {
+    const rfcValido = rfcRegex.test(this.value.toUpperCase());
+    this.classList.toggle('is-invalid', !rfcValido);
+    this.classList.toggle('is-valid', rfcValido);
+    validarFormulario();
+  });
+
+  // CURP
+  document.getElementById('curp').addEventListener('input', function () {
+    const curpValido = curpRegex.test(this.value.toUpperCase());
+    this.classList.toggle('is-invalid', !curpValido);
+    this.classList.toggle('is-valid', curpValido);
+    validarFormulario();
+  });
+  
+	// NSS
+	document.getElementById('nss').addEventListener('input', function () {
+	  const nssValido = nssRegex.test(this.value);
+	  this.classList.toggle('is-invalid', !nssValido);
+	  this.classList.toggle('is-valid', nssValido);
+	  validarFormulario();
+	});  
+
+  // Email
+  document.getElementById('email').addEventListener('input', function () {
+    const valido = this.checkValidity();
+    this.classList.toggle('is-invalid', !valido);
+    this.classList.toggle('is-valid', valido);
+    validarFormulario();
+  });
+
+  // Validar campos obligatorios para habilitar botón de guardar
+  function validarFormulario() {
+    const camposObligatorios = [
+      'nombre', 'apellido_paterno', 'apellido_materno', 'rfc',
+      'curp', 'nss', 'fecha_ingreso', 'fecha_nacimiento',
+      'plantel', 'categoria'
+    ];
+
+    const todosLlenos = camposObligatorios.every(id => {
+      const el = document.getElementById(id);
+      return el && el.value.trim() !== '' && !el.classList.contains('is-invalid');
+    });
+
+    document.getElementById('guardarBtn').disabled = !todosLlenos;
+  }
+
+  // Calcular edad
+  document.getElementById('fecha_nacimiento').addEventListener('change', function () {
+    const fechaNac = new Date(this.value);
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - fechaNac.getFullYear();
+    const mes = hoy.getMonth() - fechaNac.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) edad--;
+    document.getElementById('edad').value = isNaN(edad) ? '' : edad;
+    validarFormulario();
+  });
+
+  // Botón de borrar
+  document.getElementById('borrarBtn').addEventListener('click', function () {
+    document.querySelector('form').reset();
+    document.querySelectorAll('input, select').forEach(el => {
+      el.classList.remove('is-valid', 'is-invalid');
+    });
+    document.getElementById('guardarBtn').disabled = true;
+    document.getElementById('edad').value = '';
+  });
+</script>
+
+
+{% endblock %}

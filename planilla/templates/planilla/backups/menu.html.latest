@@ -1,0 +1,274 @@
+{% if not request.COOKIES.usuario %}
+    <script>window.location.href = "{% url 'login_usuario' %}";</script>
+{% endif %}
+
+<!DOCTYPE html>
+<html lang="es" id="htmlRoot">
+
+<head>
+{% load static %}
+<meta charset="UTF-8">
+<title>{% block title %}SELENE{% endblock %}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Bootstrap y estilos -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css" rel="stylesheet">
+
+{% block extra_css %}{% endblock %}
+
+	<link rel="icon" href="{% static 'planilla/imgs/favicon.png' %}" type="image/png">
+	<link rel="apple-touch-icon" href="{% static 'planilla/imgs/apple-touch-icon.png' %}">
+
+<style>
+
+@media (max-width: 576px) {
+    .dropdown-menu {
+        width: 100%;
+    }
+}
+
+
+.btn-theme-light {
+    background-color: #f8f9fa;
+    color: #212529;
+}
+.btn-theme-dark {
+    background-color: #212529;
+    color: #f8f9fa;
+}
+</style>
+
+	<style>
+	/* Ajuste visual del icono hamburguesa en modo oscuro */
+	.navbar-dark .navbar-toggler-icon {
+		background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+	}
+	</style>
+
+
+<script>
+// Aplica tema inmediatamente para evitar flash blanco
+(function() {
+    const theme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-bs-theme', theme);
+    if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+})();
+</script>
+
+</head>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'))
+    dropdownElementList.map(function (dropdownToggleEl) {
+        return new bootstrap.Dropdown(dropdownToggleEl)
+    });
+});
+</script>
+
+<body>
+<!-- Navbar superior -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand bi bi-house-door" href="{% url 'planilla' %}" style="color: orange;">SELENE</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContenido" aria-controls="navbarContenido" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContenido">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                <!-- Menú Altas -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="altasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-plus"></i> Altas
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="altasDropdown">
+                        {% if request.COOKIES.autorizacion != 'consultor' %}
+                        <li><a class="dropdown-item" href="{% url 'altas_nueva' %}"><i class="bi bi-plus-circle"></i> Nueva Alta</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item" href="{% url 'altas_lista' %}"><i class="bi bi-plus-square"></i> Lista de Altas</a></li>
+                    </ul>
+                </li>
+
+		<!-- Menú Bajas -->
+		<li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="bajasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+				
+				<i class="bi bi-x-octagon"></i> Bajas
+			</a>
+			<ul class="dropdown-menu" aria-labelledby="consultaDropdown">
+				</li>				
+				
+                <li><a class="dropdown-item" href="{% url 'bajas_expedientes' %}"><i class="bi bi-folder-x"></i> Lista Expedientes de Baja</a></li>				
+                <li><a class="dropdown-item" href="{% url 'planilla_bajas_lista' %}"><i class="bi bi-x-circle"></i> Lista de Bajas</a></li>
+				
+			{% if request.COOKIES.usuario == 'oscar' or request.COOKIES.usuario == 'selene' or request.COOKIES.usuario == 'admin' or request.COOKIES.usuario == 'administrador' %}
+			
+                <li><a class="dropdown-item" href="{% url 'planilla_baja' %}"><i class="bi bi-x-circle"></i> Dar de Baja</a></li>
+                
+			{% endif %}
+			
+			</ul>
+		</li>
+		
+			<!-- Menú Proceso -->
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="#" id="procesoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+					<i class="bi bi-bug"></i> Proceso
+				</a>
+				<ul class="dropdown-menu" aria-labelledby="procesoDropdown">
+					<li><a class="dropdown-item" href="{% url 'historial' %}"><i class="bi bi-journal-text"></i> Historial</a></li>
+					<li><a class="dropdown-item" href="{% url 'arbol' %}"><i class="bi bi-diagram-3"></i> Organigrama</a></li>
+
+					{% if request.COOKIES.autorizacion != 'consultor' %}
+					
+						<li><a class="dropdown-item" href="{% url 'comparar_plazas' %}"><i class="bi bi-list-stars"></i> Análisis de Plazas</a></li>
+						<li><a class="dropdown-item" href="{% url 'buscar_quincenas' %}"><i class="bi bi-funnel"></i> Quincenas Filtradas 2014-2025</a></li>					
+						<li><a class="dropdown-item" href="{% url 'quincenasf' %}"><i class="bi bi-funnel"></i> Quincenas Filtradas 2018-2024</a></li>					
+						<li><a class="dropdown-item" href="{% url 'quincenas' %}"><i class="bi bi-calendar2-week"></i> Quincenas 2018-2024</a></li>
+						<li><a class="dropdown-item" href="{% url 'subir_archivo' %}"><i class="bi bi-file-binary"></i> Subir Archivo</a></li>
+						<li><a class="dropdown-item" href="{% url 'lista_archivos' %}"><i class="bi bi-card-list"></i> Lista de Archivo Subidos</a></li>
+						<li><a class="dropdown-item" href="{% url 'listar_archivos' %}"><i class="bi bi-card-list"></i> Lista de Archivo de Prueba</a></li>
+
+					{% endif %}
+				</ul>
+			</li>		
+		
+		<!-- Menú Consulta -->
+		<li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="consultaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+				<i class="bi bi-patch-question-fill"></i> Consulta
+			</a>
+			<ul class="dropdown-menu" aria-labelledby="consultaDropdown">
+
+				<li>
+					<a class="dropdown-item" href="{% url 'anexo_ejecucion' %}"><i class="bi bi-columns"></i> Anexo</a>
+				</li>
+
+				<li>
+					<a class="dropdown-item" href="{% url 'consulta' %}"><i class="bi bi-book-half"></i> Consultar Datos Trabajador</a>
+				</li>
+				
+				<li>
+					<a class="dropdown-item" href="{% url 'ver_planilla' %}"><i class="bi bi-person-vcard"></i> Consultar Datos de Todos los Trabajadores</a>
+				</li>				
+				
+				<li>
+					<a class="dropdown-item" href="{% url 'estadisticas' %}"><i class="bi bi-bar-chart"></i> Estadísticas</a>
+				</li>
+				
+				<li>
+					<a class="dropdown-item" href="{% url 'personal_acumulado' %}"><i class="bi bi-flower2"></i> Personal Acumulado</a>
+				</li>
+				
+				<li>
+					<a class="dropdown-item" href="{% url 'personal_sindicalizado' %}"><i class="bi bi-person-fill-lock"></i> Personal Comisionado al Sindicato</a>
+				</li>		
+				
+				<li>
+					<a class="dropdown-item" href="{% url 'condiciones_generales' %}"><i class="bi bi-briefcase-fill"></i> Condiciones Generales de Trabajo</a>
+				</li>		
+
+				<li>
+					<a class="dropdown-item" href="{% url 'mapa_cecytev' %}"><i class="bi bi-globe-americas"></i> Mapa del Estado</a>
+				</li>						
+
+			{% if request.COOKIES.usuario == 'oscar' or request.COOKIES.usuario == 'selene' or request.COOKIES.usuario == 'admin' or request.COOKIES.usuario == 'dana' %}
+			
+				<li>
+					<a class="dropdown-item" href="{% url 'lista_movimientos_plaza' %}"><i class="bi bi-filetype-mov"></i> Movimientos 2025</a>
+				</li>
+				
+                <li><a class="dropdown-item" href="{% url 'beneficiarios_trabajador' %}"><i class="bi bi-piggy-bank-fill"></i> Beneficiarios</a></li>
+                
+				<li><a class="dropdown-item" href="{% url 'convenio_planilla' %}"><i class="bi bi-journal-richtext"></i> Coordinadores por Convenio</a>
+				</li>
+                        				
+			{% endif %}
+			
+			</ul>
+		</li>		
+
+
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'directorio' %}"><i class="bi bi-houses"></i> Directorio</a>
+                </li>
+
+            </ul>
+
+            <img src="{% static 'planilla/imgs/cecytev-logos.png' %}" alt="Logo CECyTEV" width="25%" />
+
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <button type="button" class="btn btn-secondary btn-sm disabled">
+                    <i class="bi bi-person-circle"></i> {{ request.COOKIES.usuario }} ({{ request.COOKIES.autorizacion }})
+                </button>
+                <button id="toggleThemeBtn" class="btn btn-sm">Claro/Oscuro</button>
+                <a href="{% url 'logout_usuario' %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i> Salir</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Contenido principal -->
+<div class="container-fluid mt-2 px-0" id="contenido">
+    {% block content %}{% endblock %}
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+
+
+<!-- Tema claro/oscuro persistente -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const htmlElem = document.documentElement;
+    const btn = document.getElementById('toggleThemeBtn');
+
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            htmlElem.classList.add('dark');
+            htmlElem.setAttribute('data-bs-theme', 'dark');
+            btn.classList.remove('btn-theme-light');
+            btn.classList.add('btn-theme-dark');
+        } else {
+            htmlElem.classList.remove('dark');
+            htmlElem.setAttribute('data-bs-theme', 'light');
+            btn.classList.remove('btn-theme-dark');
+            btn.classList.add('btn-theme-light');
+        }
+    }
+
+    // Aplicar el tema y actualizar botón al cargar DOM
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(currentTheme);
+
+    btn.addEventListener('click', () => {
+        const newTheme = htmlElem.classList.contains('dark') ? 'light' : 'dark';
+        applyTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

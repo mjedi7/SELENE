@@ -1,0 +1,86 @@
+{% extends 'planilla/menu.html' %}
+{% block title %}Consulta de Empleado{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <h3 class="text-center mb-4">Consulta por Clave de Empleado</h3>
+
+  <!-- Formulario de búsqueda -->
+  <form method="GET" action="{% url 'consulta' %}" class="row g-3 mb-4 justify-content-center">
+    <div class="col-md-2">
+      <label for="clave" class="form-label">Clave de Empleado</label>
+      <input type="text" class="form-control w-auto" id="clave" name="clave" placeholder="Ej. 2735" required>
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+      <button type="submit" class="btn btn-primary w-100">Buscar</button>
+    </div>
+  </form>
+
+  {% if empleado_items %}
+    <form method="POST" action="{% url 'consulta' %}" class="card">
+      {% csrf_token %}
+      <div class="card-header bg-success text-white d-flex justify-content-center">
+        Datos del Empleado
+      </div>
+      <div class="card-body">
+        <div class="row g-2">
+			{% for field, label in empleado_items %}
+				{% if field not in campos_ocultos %}
+            <div class="col-md-4">
+              <label class="form-label fw-bold">{{ field }}</label>
+
+              {% if autorizacion_usuario == 'consultor' or field in campos_bloqueados %}
+				{% if 'fecha' in field %}
+					<input type="date" class="form-control" name="{{ field }}" value="{{ label|date:'Y-m-d' }}" required>
+				{% else %}
+					<input type="text" class="form-control" name="{{ field }}" value="{{ label }}" required>
+				{% endif %}
+              {% else %}
+                {% if 'fecha' in field %}
+                  <input type="date" class="form-control" name="{{ field }}"  value="{{ label|date:'Y-m-d' }}" required>
+                {% else %}
+                  <input type="text" class="form-control" name="{{ field }}" value="{{ label }}" required>
+                {% endif %}
+              {% endif %}
+            </div>
+              {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      {% if autorizacion_usuario != 'consultor' %}
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-secondary" id="resetBtn">
+          <i class="bi bi-arrow-counterclockwise"></i> Resetear
+        </button>
+        <a href="{% url 'consulta' %}" class="btn btn-outline-danger">
+          <i class="bi bi-x-circle"></i> Cancelar
+        </a>
+        <button type="submit" class="btn btn-success">
+          <i class="bi bi-save"></i> Guardar Cambios
+        </button>
+      </div>
+      {% endif %}
+      
+    </form>
+  {% elif clave_busqueda %}
+    <div class="alert alert-danger mt-4">
+      No se encontró ningún empleado con la clave <strong>{{ clave_busqueda }}</strong>.
+    </div>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const resetBtn = document.getElementById('resetBtn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      document.querySelectorAll('input[name]').forEach(input => {
+        input.value = input.defaultValue;
+      });
+    });
+  }
+});
+</script>
+
+{% endblock %}

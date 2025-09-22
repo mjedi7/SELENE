@@ -1,0 +1,39 @@
+{% extends 'planilla/menu.html' %}
+
+{% block title %}Historial de Cambios{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="text-center">Historial de Cambios</h2>
+  <p class="text-muted text-center">Aquí se mostrarán los cambios realizados en el sistema.</p>
+
+  <!-- Ejemplo de tabla vacía -->
+  <table id="tablaHistorial" class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Usuario</th>
+        <th>Acción</th>
+        <th>Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Aquí podrías cargar datos reales después -->
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function () {
+    $('#tablaHistorial').DataTable({
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+      },
+      dom: 'Bfrtip',
+      buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+    });
+  });
+</script>
+{% endblock %}

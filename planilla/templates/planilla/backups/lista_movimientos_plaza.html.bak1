@@ -1,0 +1,90 @@
+{% extends 'planilla/menu.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-4">
+  <h4>Movimientos de Plaza</h4>
+
+  <div class="row mb-3 g-3">
+    <div class="col-md-6">
+      <label for="buscarGeneral" class="form-label">Buscar general:</label>
+      <input type="search" id="buscarGeneral" class="form-control" placeholder="Buscar en toda la tabla...">
+    </div>
+    <div class="col-md-6">
+      <label for="buscarInterino" class="form-label">Buscar por Interino:</label>
+      <input type="search" id="buscarInterino" class="form-control" placeholder="Nombre del interino...">
+    </div>
+  </div>
+
+  <table id="tablaMovimientos" class="table table-striped table-bordered table-sm" style="width:100%">
+    <thead class="table-dark">
+      <tr>
+        <th>Secuencial</th>
+        <th>Clave</th>
+        <th>Adscripción</th>
+        <th>Categoría</th>
+        <th>Dueño Plaza</th>
+        <th>Interino</th>
+        <th>Fecha Movimiento</th>
+        <th>Observaciones</th>
+        <th>No. Oficio</th>
+        <th>Temporal</th>
+        <th>Tipo Plaza</th>
+        <th>Extra</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in lista_movimientos_plaza %}
+      <tr>
+        <td>{{ m.secuencial }}</td>
+        <td>{{ m.clave }}</td>
+        <td>{{ m.adscripcion }}</td>
+        <td>{{ m.categoria }}</td>
+        <td>{{ m.dueno_plaza }}</td>
+        <td>{{ m.interino }}</td>
+        <td>{{ m.fecha_movimiento }}</td>
+        <td>{{ m.observaciones }}</td>
+        <td>{{ m.no_oficio }}</td>
+        <td>{{ m.temporal }}</td>
+        <td>{{ m.tipo_plaza }}</td>
+        <td>{{ m.extra }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="12" class="text-center">No hay movimientos de plaza registrados.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- DataTables & Bootstrap CSS/JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script> <!-- Omitir si ya cargado -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+    var tabla = $('#tablaMovimientos').DataTable({
+      paging: false,
+      order: [[6, 'desc']],
+      language: {
+        url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+      }
+    });
+
+    // Buscador general
+    $('#buscarGeneral').on('keyup change', function() {
+      tabla.search(this.value).draw();
+    });
+
+    // Buscador específico por Interino (columna 5)
+    $('#buscarInterino').on('keyup change', function() {
+      tabla.column(5).search(this.value).draw();
+    });
+  });
+</script>
+
+{% endblock %}

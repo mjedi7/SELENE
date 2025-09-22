@@ -1,0 +1,26 @@
+{% extends 'planilla/menu.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h4>Archivos subidos</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Archivo</th>
+                <th>Fecha</th>
+                <th>Subido por</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for archivo in archivos %}
+            <tr>
+                <td>{{ archivo.nombre }}</td>
+                <td><a href="{{ archivo.archivo.url }}" target="_blank">Descargar</a></td>
+                <td>{{ archivo.fecha_subida }}</td>
+                <td>{{ archivo.subido_por }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

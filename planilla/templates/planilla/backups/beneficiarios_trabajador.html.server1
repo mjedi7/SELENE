@@ -1,0 +1,116 @@
+{% extends 'planilla/menu.html' %}
+{% load static %}
+
+{% block content %}
+
+	<style>
+	/* Resaltar columna "Nombre Beneficiario" al pasar el mouse sobre la fila */
+	#tablaBeneficiarios tr:hover td:nth-child(6),
+	#tablaBeneficiarios tr:hover th:nth-child(6) {
+		background-color: #fdf500; /* fondo amarillo */
+		color: #007; /* texto azul */
+		font-weight: bold;
+		transition: background-color 0.3s, color 0.3s; /* suaviza el cambio */
+	}
+	</style>
+
+<div class="container mt-4">
+    <h4>Búsqueda de Beneficiarios por Clave de Trabajador</h4>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="claveInput" class="form-control" placeholder="Ingrese clave del trabajador">
+        </div>
+        <div class="col-md-2">
+            <button id="buscarBtn" class="btn btn-primary">Buscar</button>
+        </div>
+        <div class="col-md-2">
+            <button id="resetBtn" class="btn btn-secondary">Reiniciar búsqueda</button>
+        </div>
+    </div>
+
+    <table id="tablaBeneficiarios" class="table table-striped table-bordered w-100">
+        <thead>
+            <tr>
+                <th>Nombre Trabajador</th><th>Departamento</th><th>Puesto</th><th>Clave</th><th>Sindicato</th>
+                <th>Nombre Beneficiario</th><th>Banco</th><th>Cuenta Deposito</th>
+                <th>%1</th><th>%2</th><th>%3</th><th>%4</th><th>Cant. Fija</th>
+                <th>Notas 1</th><th>Notas 2</th><th>Notas 3</th><th>Notas 4</th>
+                <th>No Expediente</th><th>No Oficio</th><th>Fecha Documento</th><th>Lugar Documento</th>
+                <th>Resolución</th><th>% Oscar</th>
+                <th>PDF</th> <!-- Nueva columna -->
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function() {
+
+    var tabla = $('#tablaBeneficiarios').DataTable({
+        ajax: {
+            url: "{% url 'beneficiarios_trabajador_json' %}",
+            type: "GET",
+            dataSrc: "data",
+            error: function() {
+                alert('Error al cargar datos iniciales.');
+            }
+        },
+        columns: [
+            { data: 'nombre_trabajador' }, { data: 'departamento' }, { data: 'puesto' }, { data: 'clave' }, { data: 'sindicato' },
+            { data: 'nombre_beneficiario' }, { data: 'banco' }, { data: 'cuenta_deposito' },
+            { data: 'porcentaje_1' }, { data: 'porcentaje_2' }, { data: 'porcentaje_3' }, { data: 'porcentaje_4' }, { data: 'cantidad_fija' },
+            { data: 'notas_1' }, { data: 'notas_2' }, { data: 'notas_3' }, { data: 'notas_4' },
+            { data: 'no_expediente' }, { data: 'no_oficio' }, { data: 'fecha_documento' }, { data: 'lugar_documento' },
+            { data: 'resolucion' }, { data: 'porcentaje_oscar' },
+            { 
+                data: 'clave',
+                render: function(data, type, row) {
+                    if (!data) return '';
+                    var url = '/media/pension/' + data + '.pdf';
+                    return '<a class="btn btn-sm btn-danger" target="_blank" href="' + url + '">Ver PDF</a>';
+                }
+            }
+        ],
+        paging: false
+    });
+
+    function buscarClave() {
+        var clave = $('#claveInput').val().trim();
+        if (!clave) {
+            alert('Ingrese una clave.');
+            return;
+        }
+
+        $.ajax({
+            url: "{% url 'beneficiarios_trabajador_json' %}",
+            type: "POST",
+            data: {
+                'clave': clave,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                tabla.clear().rows.add(response.data).draw();
+                if (response.mensaje) alert(response.mensaje);
+            },
+            error: function() {
+                alert('Error al buscar datos.');
+            }
+        });
+    }
+
+    $('#buscarBtn').click(buscarClave);
+    $('#claveInput').keypress(function(e) { if (e.which === 13) buscarClave(); });
+    $('#resetBtn').click(function() {
+        $('#claveInput').val('');
+        tabla.ajax.reload();
+        $('#claveInput').focus();
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends 'planilla/menu.html' %}
+{% block content %}
+
+<h4>Expedientes de Bajas</h4>
+<table id="tablaExpedientes" class="table table-striped">
+    <thead>
+        <tr>
+            <th>Clave</th>
+            <th>Nombre</th>
+            <th>Departamento</th>
+            <th>Puesto</th>
+            <th>Anaquel</th>
+            <th>Ubicación</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+</table>
+
+<!-- Modal -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="formEditar">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Expediente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="expedienteId">
+            <div class="mb-2">
+                <label>Clave:</label>
+                <input type="text" id="clave" class="form-control" required>
+            </div>
+            <div class="mb-2">
+                <label>Nombre:</label>
+                <input type="text" id="nombre" class="form-control" required>
+            </div>
+            <div class="mb-2">
+                <label>Departamento:</label>
+                <input type="text" id="departamento" class="form-control">
+            </div>
+            <div class="mb-2">
+                <label>Puesto:</label>
+                <input type="text" id="puesto" class="form-control">
+            </div>
+            <div class="mb-2">
+                <label>Anaquel:</label>
+                <input type="text" id="anaquel" class="form-control">
+            </div>
+            <div class="mb-2">
+                <label>Ubicación:</label>
+                <input type="text" id="ubicacion" class="form-control">
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    let usuario = getCookie('usuario'); // Ajusta según tu cookie de usuario
+
+    let tabla = $('#tablaExpedientes').DataTable({
+        ajax: "{% url 'bajas_expedientes_lista' %}",
+        columns: [
+            { data: 'clave' },
+            { data: 'nombre' },
+            { data: 'departamento' },
+            { data: 'puesto' },
+            { data: 'anaquel' },
+            { data: 'ubicacion' },
+            {
+                data: null,
+                render: function(data, type, row) {
+                    if (usuario !== 'consultor') {
+                        return `<button class="btn btn-sm btn-primary btn-editar" data-id="${row.id}">Editar</button>`;
+                    } else {
+                        return '';
+                    }
+                }
+            }
+        ]
+    });
+
+    $('#tablaExpedientes').on('click', '.btn-editar', function() {
+        let id = $(this).data('id');
+        let data = tabla.row($(this).parents('tr')).data();
+        $('#expedienteId').val(id);
+        $('#clave').val(data.clave);
+        $('#nombre').val(data.nombre);
+        $('#departamento').val(data.departamento);
+        $('#puesto').val(data.puesto);
+        $('#anaquel').val(data.anaquel);
+        $('#ubicacion').val(data.ubicacion);
+        $('#modalEditar').modal('show');
+    });
+
+    $('#formEditar').submit(function(e) {
+        e.preventDefault();
+        let id = $('#expedienteId').val();
+        let datos = {
+            clave: $('#clave').val(),
+            nombre: $('#nombre').val(),
+            departamento: $('#departamento').val(),
+            puesto: $('#puesto').val(),
+            anaquel: $('#anaquel').val(),
+            ubicacion: $('#ubicacion').val()
+        };
+        fetch(`/bajas_expedientes/actualizar/${id}/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: JSON.stringify(datos)
+        }).then(resp => resp.json()).then(data => {
+            if (data.status === 'success') {
+                $('#modalEditar').modal('hide');
+                tabla.ajax.reload(null, false);
+            }
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            let cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+
+{% endblock %}

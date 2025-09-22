@@ -1,0 +1,136 @@
+{% extends 'planilla/menu.html' %}
+
+{% block title %}Estadísticas - Planilla{% endblock %}
+
+{% block content %}
+<div class="container mt-4" id="tablaComparaPlazas">
+  <h2>Estadísticas de la Planilla</h2>
+  <hr>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card text-white bg-primary mb-3">
+        <div class="card-header">Total de Trabajadores</div>
+        <div class="card-body">
+          <h3 class="card-title">{{ total_trabajadores }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card text-white bg-success mb-3">
+        <div class="card-header">Puestos Únicos</div>
+        <div class="card-body">
+          <h3 class="card-title">{{ puestos_unicos }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4 class="mt-5">Conteo por Puesto</h4>
+  <table class="table table-bordered table-striped mt-3">
+    <thead class="table-dark">
+      <tr>
+        <th>Puesto</th>
+        <th>Cantidad</th>
+        <th>Coincide en Plazas</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in conteo_y_coincidencia %}
+      <tr>
+        <td>{{ item.puesto }}</td>
+        <td>{{ item.cantidad }}</td>
+        <td>
+          {% if item.coincide %}
+            ✅
+          {% else %}
+            ❌
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    
+<table class="table table-bordered table-striped mt-3">
+  <thead class="table-dark">
+    <tr>
+      <th>Puesto</th>
+      <th>Cantidad Planilla</th>
+      <th>Cantidad Plazas</th>
+      <th>Diferencia</th>
+      <th>Coincide en Plazas</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in conteo_y_coincidencia %}
+    <tr>
+      <td>{{ item.puesto }}</td>
+      <td>{{ item.cantidad_planilla }}</td>
+      <td>{{ item.cantidad_plazas }}</td>
+      <td>{{ item.diferencia }}</td>
+      <td>
+        {% if item.coincide %}
+          ✅
+        {% else %}
+          ❌
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+    
+  </table>
+  
+  <h4 class="mt-5">Gráfica de Puestos</h4>
+  <div style="height: 800px;">
+    <canvas id="graficaPuestos"></canvas>
+  </div>
+
+  <!-- CDN de Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    const ctx = document.getElementById('graficaPuestos').getContext('2d');
+
+    const data = {
+      labels: {{ puestos_labels|safe }},
+      datasets: [{
+        label: 'Cantidad por Puesto',
+        data: {{ puestos_data|safe }},
+        backgroundColor: [
+          'rgba(255, 165, 0, 0.7)',  // naranja
+          'rgba(255, 99, 132, 0.7)', // rojo
+          'rgba(75, 192, 192, 0.7)', // aqua
+          'rgba(153, 102, 255, 0.7)', // morado
+          'rgba(255, 206, 86, 0.7)', // amarillo
+          'rgba(54, 162, 235, 0.7)', // azul
+          'rgba(201, 203, 207, 0.7)' // gris
+        ],
+        borderColor: 'white',
+        borderWidth: 1
+      }]
+    };
+
+    const config = {
+      type: 'doughnut',
+      data: data,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'right',
+          },
+          tooltip: {
+            mode: 'nearest',
+            intersect: false
+          }
+        }
+      }
+    };
+
+    new Chart(ctx, config);
+  </script>
+  
+</div>
+{% endblock %}

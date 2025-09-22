@@ -1,0 +1,155 @@
+{% extends 'planilla/menu.html' %}
+
+{% block title %}Directorio de Planteles{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* Evita que el texto se desborde y haga salto de línea */
+#adscripcionTable th,
+#adscripcionTable td {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Columnas Director, Coord. Administrativo y Coord. Académico (15,16,17) con ancho fijo */
+#adscripcionTable th:nth-child(15),
+#adscripcionTable td:nth-child(15),
+#adscripcionTable th:nth-child(16),
+#adscripcionTable td:nth-child(16),
+#adscripcionTable th:nth-child(17),
+#adscripcionTable td:nth-child(17) {
+  width: 800px;
+  max-width: 800px;
+    white-space: nowrap;
+}
+
+</style>
+
+<div class="container mt-4">
+    <h2>Tabla de Adscripción</h2>
+    
+    <table id="adscripcionTable" class="table table-striped">
+
+		<thead>
+		<tr>
+			<th>No.</th> <!-- 0  -->
+			<th>Clave Adscripción</th> <!-- 1 -->
+			<th>Nombre</th>
+			<th>Departamento</th> <!-- 3 ocultar -->
+			<th>Área</th> <!-- 4 ocultar -->
+			<th>Teléfono 1</th>
+			<th>Teléfono 2</th>
+			<th>Extensión Depto</th>
+			<th>Extensiones Aux</th>
+			<th>Director</th>
+			<th>Coord. Administrativo</th>
+			<th>Coord. Académico</th>
+			<th>Dirección</th>
+			<th>Activo</th> <!-- ocultar -->
+			<th>Fecha Creación</th>
+			<th>CCT</th>			
+			<th>Ubicación Completa</th> <!-- nueva columna combinada -->			
+		</tr>
+		</thead>
+
+		<tbody>
+		{% for a in directorio %}
+			<tr>
+				
+				<td>{{ a.id }}</td>
+				
+				<!--
+				<td>{{ a.id }}</td> 
+				-->
+				
+				<td>{{ a.clave_adscripcion }}</td> <!-- ocultar -->
+				<td>{{ a.nombre }}</td>
+				<td>{{ a.nombre_departamento_corto }}</td> <!-- ocultar -->
+				<td>{{ a.area }}</td> <!-- ocultar -->
+				<td>{{ a.telefono_plantel }}</td>
+				<td>{{ a.telefono_plantel2 }}</td>
+				<td>{{ a.extension_depto }}</td>
+				<td>{{ a.extensiones_aux }}</td>
+				<td>{{ a.director }}</td>
+				<td>{{ a.coordinador_administrativo }}</td>
+				<td>{{ a.coordinador_academico }}</td>
+				<td>{{ a.direccion }}</td>
+				<td>{{ a.activo }}</td> <!-- ocultar -->
+				<td>{{ a.fecha_creacion }}</td>
+				<td>{{ a.cct }}</td>				
+				<td>
+					{{ a.calle_numero }},
+					{{ a.colonia_zona }},
+					CP {{ a.codigo_postal }},
+					{{ a.ciudad_estado }},
+					{{ a.municipio }},
+					Zona {{ a.zona }}
+				</td> <!-- columna combinada -->				
+			</tr>
+		{% endfor %}
+		</tbody>
+
+    </table>
+</div>
+
+<!--
+<script>
+
+$(document).ready(function () {
+    var table = $('#adscripcionTable').DataTable({
+        paging: false,
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print', 'colvis',
+            {
+                text: 'Resetear filtros',
+                action: function ( e, dt, node, config ) {
+                    dt.state.clear();
+                    window.location.reload();
+                }
+            }
+        ],
+        ordering: true,
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+        },
+        columnDefs: [
+            { targets: [1, 3, 6, 12, 13, 14, 15], visible: false },
+        ]
+    });
+});
+</script>
+-->
+{% block extra_js %}
+<script>
+$(document).ready(function () {
+    $('#adscripcionTable').DataTable({
+        paging: false,
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print', 'colvis',
+            {
+                text: 'Resetear filtros',
+                action: function ( e, dt, node, config ) {
+                    dt.state.clear();
+                    window.location.reload();
+                }
+            }
+        ],
+        ordering: true,
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+        },
+        columnDefs: [
+            { targets: [1, 3, 6, 12, 13, 14, 15], visible: false },
+        ]
+    });
+});
+</script>
+{% endblock %}
+
+
+{% endblock %}

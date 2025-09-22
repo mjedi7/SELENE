@@ -1,0 +1,155 @@
+{% extends 'planilla/menu.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h3>Expedientes de Bajas</h3>
+    <table id="tablaExpedientes" class="table table-striped table-bordered" style="width:100%">
+        <thead>
+            <tr>
+                <th>Clave</th>
+                <th>Nombre</th>
+                <th>Departamento</th>
+                <th>Puesto</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<!-- Modal Editar -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formEditar">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Expediente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="expedienteId">
+                    <div class="mb-2">
+                        <label>Clave</label>
+                        <input type="text" id="clave" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label>Nombre</label>
+                        <input type="text" id="nombre" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label>Departamento</label>
+                        <input type="text" id="departamento" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label>Puesto</label>
+                        <input type="text" id="puesto" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label>Anaquel</label>
+                        <input type="text" id="anaquel" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label>Ubicación</label>
+                        <input type="text" id="ubicacion" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label>Fecha Baja</label>
+                        <input type="date" id="fecha_baja" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label>Caja</label>
+                        <input type="text" id="caja" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label>Observaciones</label>
+                        <input type="text" id="observaciones" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+$(document).ready(function(){
+    let tabla = $('#tablaExpedientes').DataTable({
+        ajax: '/bajas_expedientes/listar/',
+        columns: [
+            { data: 'clave' },
+            { data: 'nombre' },
+            { data: 'departamento' },
+            { data: 'puesto' },
+            {
+                data: null,
+                render: function(data){
+                    return `<button class="btn btn-sm btn-primary btn-editar" data-id="${data.id}">Editar</button>`;
+                }
+            }
+        ],
+        language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' }
+    });
+
+    $('#tablaExpedientes').on('click', '.btn-editar', function(){
+        let id = $(this).data('id');
+        $.get(`/bajas_expedientes/obtener/${id}/`, function(data){
+            $('#expedienteId').val(data.id);
+            $('#clave').val(data.clave);
+            $('#nombre').val(data.nombre);
+            $('#departamento').val(data.departamento);
+            $('#puesto').val(data.puesto);
+            $('#anaquel').val(data.anaquel);
+            $('#ubicacion').val(data.ubicacion);
+            $('#fecha_baja').val(data.fecha_baja);
+            $('#caja').val(data.caja);
+            $('#observaciones').val(data.observaciones);
+            $('#modalEditar').modal('show');
+        });
+    });
+
+    $('#formEditar').submit(function(e){
+        e.preventDefault();
+        let id = $('#expedienteId').val();
+        let datos = {
+            clave: $('#clave').val(),
+            nombre: $('#nombre').val(),
+            departamento: $('#departamento').val(),
+            puesto: $('#puesto').val(),
+            anaquel: $('#anaquel').val(),
+            ubicacion: $('#ubicacion').val(),
+            fecha_baja: $('#fecha_baja').val() || null,
+            caja: $('#caja').val(),
+            observaciones: $('#observaciones').val()
+        };
+        fetch(`/bajas_expedientes/actualizar/${id}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(datos)
+        })
+        .then(resp => resp.json())
+        .then(data => {
+            if(data.status === 'success'){
+                $('#modalEditar').modal('hide');
+                tabla.ajax.reload(null, false);
+            } else {
+                alert('Error al guardar los cambios.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al conectar con el servidor.');
+        });
+    });
+});
+</script>
+{% endblock %}

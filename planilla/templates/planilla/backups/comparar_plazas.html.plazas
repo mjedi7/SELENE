@@ -1,0 +1,123 @@
+{% extends "planilla/menu.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Análisis de Plazas</h2>
+
+    <!-- Formulario de selección -->
+    <form method="get" class="mb-4">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label for="zona" class="form-label">Zona económica</label>
+                <select id="zona" name="zona" class="form-select">
+                    <option value="">-- Selecciona zona --</option>
+                    <option value="2" {% if zona == "2" %}selected{% endif %}>Zona 2</option>
+                    <option value="3" {% if zona == "3" %}selected{% endif %}>Zona 3</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label for="denominacion" class="form-label">Categoría / Puesto</label>
+                <select id="denominacion" name="denominacion" class="form-select">
+                    <option value="">-- Selecciona categoría --</option>
+                    {% for cat in categorias %}
+                        <option value="{{ cat }}" {% if denominacion == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Comparar</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Resultados -->
+    {% if zona and denominacion %}
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title">{{ denominacion }}</h4>
+                <p class="card-text"><strong>Zona económica:</strong> {{ zona }}</p>
+                <p class="card-text"><strong>Plazas autorizadas:</strong> {{ plazas_autorizadas }}</p>
+                <p class="card-text"><strong>Plazas ocupadas:</strong> {{ plazas_ocupadas }}</p>
+
+				<p class="card-text">
+					<strong>Disponibles:</strong>
+					{% if disponibles > 0 %}
+						<span class="text-success fw-bold">{{ disponibles }}</span>
+					{% else %}
+						<span class="text-danger fw-bold">{{ disponibles }}</span>
+					{% endif %}
+				</p>
+
+            </div>
+        </div>
+
+{% if personal_comisionado %}
+    <h5 class="mt-4">Personal Comisionado</h5>
+    <div class="table-responsive mb-4">
+        <table class="table table-bordered table-hover">
+            <thead class="table-warning">
+                <tr>
+                    <th>Clave</th>
+                    <th>Nombre</th>
+                    <th>Adscripción</th>
+                    <th>Puesto</th>
+                    <th>Zona</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in personal_comisionado %}
+                <tr>
+                    <td>{{ t.clave }}</td>
+                    <td>{{ t.nombre }}</td>
+                    <td>{{ t.adscripcion }}</td>
+                    <td>{{ t.puesto }}</td>
+                    <td>{{ t.zona }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+
+
+		<h5>Trabajadores en esta categoría</h5>
+		{% if trabajadores %}
+			<div class="table-responsive">
+				<table class="table table-bordered table-hover">
+					<thead class="table-dark">
+						<tr>
+							<th>Clave</th>
+							<th>Nombre</th>
+							<th>Adscripción</th>  <!-- NUEVO -->
+							<th>Puesto</th>
+							<th>Zona</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for t in trabajadores %}
+						<tr>
+							<td>{{ t.clave }}</td>
+							<td>{{ t.nombre }}</td>
+							<td>{{ t.adscripcion }}</td> <!-- NUEVO -->
+							<td>{{ t.puesto }}</td>
+							<td>{{ t.zona }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% else %}
+			<div class="alert alert-warning">No hay trabajadores registrados en esta categoría y zona.</div>
+		{% endif %}
+
+
+    {% else %}
+        <div class="alert alert-info">
+            Selecciona una zona y una categoría para comparar.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

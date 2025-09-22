@@ -1,0 +1,36 @@
+{% extends 'planilla/menu.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Dar de Baja a Trabajador</h3>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="clave">No. de Personal (Clave):</label>
+            <input type="text" name="clave" id="clave" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Buscar</button>
+    </form>
+
+    {% if trabajador %}
+    <h4 class="mt-4">Datos del Trabajador</h4>
+    <table class="table table-bordered">
+        <tr><th>Nombre</th><td>{{ trabajador.nombre }}</td></tr>
+        <tr><th>Adscripción</th><td>{{ trabajador.adscripcion }}</td></tr>
+        <tr><th>Departamento</th><td>{{ trabajador.departamento }}</td></tr>
+        <tr><th>Puesto</th><td>{{ trabajador.puesto }}</td></tr>
+        <tr><th>RFC</th><td>{{ trabajador.rfc }}</td></tr>
+        <tr><th>CURP</th><td>{{ trabajador.curp }}</td></tr>
+    </table>
+    <form method="post" action="{% url 'dar_de_baja' trabajador.clave %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="motivo">Motivo de Baja (opcional):</label>
+            <textarea name="motivo" id="motivo" class="form-control" rows="2"></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger mt-2" onclick="return confirm('¿Estás seguro de dar de baja a este trabajador?');">
+            Dar de Baja
+        </button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}
