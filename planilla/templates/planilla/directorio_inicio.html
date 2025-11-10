@@ -1,0 +1,15 @@
+{% extends 'planilla/menu.html' %}
+{% block content %}
+<div class="container mt-5 text-center">
+    <h3 class="mb-4">Seleccione un Directorio</h3>
+
+    <div class="d-flex justify-content-center gap-3">
+        <a href="{% url 'directorio_direccion' %}" class="btn btn-primary btn-lg">
+            Directorio Dirección General
+        </a>
+        <a href="{% url 'directorio_planteles' %}" class="btn btn-success btn-lg">
+            Directorio de Planteles
+        </a>
+    </div>
+</div>
+{% endblock %}

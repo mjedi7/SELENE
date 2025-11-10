@@ -19,7 +19,6 @@ class Planilla(models.Model):
     email = models.TextField(blank=True, null=True)
     zona = models.IntegerField(blank=True, null=True)
     antiguedad = models.TextField(blank=True, null=True)
-    tipo = models.TextField(blank=True, null=True)
     sdi = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
     total = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
     total_deducciones = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
@@ -30,25 +29,12 @@ class Planilla(models.Model):
     valor_unitario = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
     importe = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
     dias_pago = models.IntegerField(blank=True, null=True)
-    periodo = models.TextField(blank=True, null=True)
-    folio = models.TextField(blank=True, null=True)
-    total_percepciones = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
-    origen_recurso1 = models.TextField(blank=True, null=True)
-    origen_recurso2 = models.TextField(blank=True, null=True)
-    tipo_contrato = models.TextField(blank=True, null=True)
-    jornada = models.TextField(blank=True, null=True)
-    tipo_regimen = models.TextField(blank=True, null=True)
-    riesgo_puesto = models.IntegerField(blank=True, null=True)
-    periodicidad_pago = models.TextField(blank=True, null=True)
-    total_sueldos = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
-    total_exento = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
-    total_gravado = models.DecimalField(max_digits=18, decimal_places=2, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.no is None:
             raise ValueError("El campo 'no' no puede ser None")
-
+            
     class Meta:
         db_table = 'planilla3'
 
@@ -76,6 +62,7 @@ class Plazas(models.Model):
     horas = models.IntegerField()
     
     class Meta:
+        managed = False
         db_table = 'plazas'  # Esta apunta a tabla 'plazas'
 
 class Directorio(models.Model):
@@ -202,9 +189,6 @@ class Convenio(models.Model):
     def __str__(self):
         return f"{self.clave} - {self.funcion_en_plantel}"
 
-from django.db import models
-
-from django.db import models
 
 class Planilla3(models.Model):
     clave = models.IntegerField(primary_key=True)
@@ -231,3 +215,94 @@ class Planilla3(models.Model):
 
     def __str__(self):
         return f"{self.clave} - {self.nombre}"
+        
+    class Meta:
+        managed = False
+        db_table = 'planilla3'
+
+class Planilla4(models.Model):
+    clave = models.TextField(primary_key=True)  # <<--- lo marcamos como llave primaria
+    rfc = models.TextField(blank=True, null=True)
+    nombre = models.TextField(blank=True, null=True)
+    departamento = models.TextField(blank=True, null=True)
+    puesto = models.TextField(blank=True, null=True)
+    fecha_inicio_rel_laboral = models.TextField(blank=True, null=True)
+    curp = models.TextField(blank=True, null=True)
+    nss = models.TextField(blank=True, null=True)
+    sindicalizado = models.TextField(blank=True, null=True)
+    activo = models.TextField(blank=True, null=True)
+    baja = models.TextField(blank=True, null=True)
+    quincenas_como_base = models.TextField(blank=True, null=True)
+    nombramiento_si_no = models.TextField(blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
+    categoria_ultimo_nombramiento = models.TextField(blank=True, null=True)
+    fecha_ultimo_nombramiento = models.TextField(blank=True, null=True)
+    firma_ultimo_nombramiento = models.TextField(blank=True, null=True)
+    genero = models.TextField(blank=True, null=True)
+    fecha_nacimiento = models.TextField(blank=True, null=True)
+    num_particular = models.TextField(blank=True, null=True)
+    num_telefono = models.TextField(blank=True, null=True)
+    c_estudios = models.TextField(blank=True, null=True)
+    cedula = models.TextField(blank=True, null=True)
+    universidad = models.TextField(blank=True, null=True)
+    cedula_validada = models.TextField(blank=True, null=True)
+    calle = models.TextField(blank=True, null=True)
+    colonia = models.TextField(blank=True, null=True)
+    ciudad = models.TextField(blank=True, null=True)
+    cp = models.TextField(blank=True, null=True)
+    fecha_licencia = models.TextField(blank=True, null=True)
+    motivo_licencia = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'planilla4'
+        managed = False
+        
+class PersonalSindicalizado(models.Model):
+    id = models.AutoField(primary_key=True)
+    numero = models.IntegerField(unique=True)
+
+    class Meta:
+        managed = False  # importante: no dejes que Django intente crearla
+        db_table = 'personal_sindicalizado'
+
+    def __str__(self):
+        return str(self.numero)
+        
+class DirDG(models.Model):
+    ext = models.IntegerField(primary_key=True)  # Usamos 'ext' como clave primaria
+    adscripcion = models.TextField(blank=True, null=True)
+    cargo = models.TextField(blank=True, null=True)
+    nombre = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'dir_dg'
+
+    def __str__(self):
+        return f"{self.nombre} - {self.cargo}"
+        
+from django.db import models
+
+class DirPlanteles(models.Model):
+    no = models.IntegerField(db_column='NO', primary_key=True)
+    plantel = models.TextField()
+    telefono = models.TextField(blank=True, null=True)
+    telefono_2 = models.TextField(blank=True, null=True)
+    director = models.TextField(blank=True, null=True)
+    encargado = models.TextField(blank=True, null=True)
+    tel_director = models.TextField(blank=True, null=True)
+    coor_adm = models.TextField(blank=True, null=True)
+    tel_adm = models.TextField(blank=True, null=True)
+    coor_aca = models.TextField(blank=True, null=True)
+    tel_aca = models.TextField(blank=True, null=True)
+    cct = models.TextField(blank=True, null=True)
+    fecha_creacion = models.DateField(blank=True, null=True)
+    dof = models.DateField(blank=True, null=True)
+    folio = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False  # porque la tabla ya existe
+        db_table = 'dir_planteles'
+
+    def __str__(self):
+        return f"{self.plantel}"       

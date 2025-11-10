@@ -1,0 +1,84 @@
+{% extends 'planilla/menu.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h3 class="text-center mb-4">Directorio - Dirección General</h3>
+
+    <div class="table-responsive">
+        <table id="tablaDirDG" class="table table-striped table-bordered" style="width:100%">
+            <thead class="table-dark">
+                <tr>
+                    <th>Extensión</th>
+                    <th>Adscripción</th>
+                    <th>Cargo</th>
+                    <th>Nombre</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in registros %}
+                <tr>
+                    <td>{{ r.ext }}</td>
+                    <td>{{ r.adscripcion }}</td>
+                    <td>{{ r.cargo }}</td>
+                    <td>{{ r.nombre }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ==================== SCRIPTS ==================== -->
+<!-- DataTables + Bootstrap 5 + Buttons -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#tablaDirDG').DataTable({
+        paging: false,          // Sin paginación
+        searching: true,        // Búsqueda habilitada
+        ordering: true,         // Ordenar columnas
+        info: false,            // Sin texto de info
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'print',
+                text: 'Imprimir',
+                className: 'btn btn-outline-secondary'
+            },
+            {
+                extend: 'pdfHtml5',
+                text: 'Exportar a PDF',
+                className: 'btn btn-outline-danger',
+                orientation: 'portrait',
+                pageSize: 'A4',
+                exportOptions: {
+                    columns: ':visible'
+                },
+                title: 'Directorio - Dirección General'
+            }
+        ],
+        language: {
+            search: "Buscar:",
+            zeroRecords: "No se encontraron resultados",
+            infoEmpty: "Sin registros",
+            buttons: {
+                print: "Imprimir",
+                pdf: "Exportar a PDF"
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

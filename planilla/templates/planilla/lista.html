@@ -33,7 +33,7 @@
 
 <div class="container-fluid mt-2">
     <div class="text-center">
-        <h3 class="mb-3">Plantilla de Trabajadores CECyTEV (1a Quincena Agosto 2025)</h3>
+        <h3 class="mb-3">Plantilla de Trabajadores CECyTEV (2a Quincena Septiembre 2025)</h3>
     </div>
 
     <div class="d-flex align-items-end flex-wrap gap-2 mb-3 px-2">
@@ -42,7 +42,6 @@
 				<select id="columnaSelect" class="form-select form-select-sm">
 					<option value="-1">Todas las columnas</option>
 					<option value="0">Nombre</option>
-					<option value="1">Adscripcion</option>
 					<option value="2">Departamento</option>
 					<option value="3">Clave</option>
 					<option value="4">RFC</option>
@@ -70,7 +69,6 @@
             <thead>
                 <tr>
                     <th data-col="nombre">Nombre <i class="bi bi-person-down"></i></th>
-                    <th data-col="adscripcion">Adscripcion <i class="bi bi-bucket"></i></th>
                     <th data-col="departamento">Departamento</th>
                     <th data-col="clave">#</th>
                     <th data-col="rfc">RFC</th>
@@ -88,7 +86,6 @@
                 {% for fila in datos %}
                 <tr>
                     <td>{{ fila.nombre }}</td>
-                    <td>{{ fila.adscripcion }}</td>
                     <td>{{ fila.departamento }}</td>
                     <td>{{ fila.clave }}</td>
                     <td>{{ fila.rfc }}</td>

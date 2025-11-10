@@ -1,32 +1,7 @@
 {% extends 'planilla/menu.html' %}
 {% block content %}
 <div class="container mt-4">
-    <h3 class="text-center">Comité/Comitiva Sindical</h3>
-
-    <table id="tablaComiteSindical" class="table table-striped table-bordered" style="width:100%">
-        <thead>
-            <tr>
-                <th>Clave</th>
-                <th>Nombre</th>
-                <th>Departamento</th>
-                <th>Puesto</th>
-                <th>Fecha de ingreso</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for clave, nombre, departamento, puesto, fecha in comite %}
-            <tr>
-                <td>{{ clave }}</td>
-                <td>{{ nombre }}</td>
-                <td>{{ departamento }}</td>
-                <td>{{ puesto }}</td>
-                <td>{{ fecha }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h3 class="text-center mt-5">Personal Comisionado al Sindicato</h3>
+    <h3 class="text-center">Personal Comisionado al Sindicato</h3>
 
     <table id="tablaPersonalSindicalizado" class="table table-striped table-bordered" style="width:100%">
         <thead>
@@ -52,7 +27,6 @@
     </table>
 </div>
 
-
 <!-- DataTables CSS/JS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -76,32 +50,29 @@
 
 <script>
 $(document).ready(function() {
-    $('#tablaComiteSindical').DataTable({
-        paging: false,
-        ordering: true,
-        searching: true,
-        language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
-        order: [[1, 'asc']],
-        dom: 'Bfrtip',
-        buttons: [
-            { extend: 'excelHtml5', title: 'Comité/Comitiva Sindical' },
-            { extend: 'pdfHtml5', title: 'Comité/Comitiva Sindical' },
-            { extend: 'print', title: 'Comité/Comitiva Sindical' }
-        ]
-    });
-
     $('#tablaPersonalSindicalizado').DataTable({
         paging: false,
         ordering: true,
         searching: true,
-        language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+        },
         order: [[1, 'asc']],
-        dom: 'Bfrtip',
-        buttons: [
-            { extend: 'excelHtml5', title: 'Personal Comisionado al Sindicato' },
-            { extend: 'pdfHtml5', title: 'Personal Comisionado al Sindicato' },
-            { extend: 'print', title: 'Personal Comisionado al Sindicato' }
-        ]
+        dom: 'Bfrtip',  // Muestra los botones arriba de la tabla
+		buttons: [
+			{
+				extend: 'excelHtml5',
+				title: 'Personal Comisionado al Sindicato'
+			},
+			{
+				extend: 'pdfHtml5',
+				title: 'Personal Comisionado al Sindicato'
+			},
+			{
+				extend: 'print',
+				title: 'Personal Comisionado al Sindicato'
+			}
+		]
     });
 });
 </script>

@@ -46,6 +46,11 @@ urlpatterns = [
     path('quincenas3/', views.buscar_quincenas, name='buscar_quincenas'),    
     path("planilla4/", views.ver_planilla, name="ver_planilla"),
     path("comparar-plazas/", views.comparar_plazas, name="comparar_plazas"),
+    path("ley-estatal-servicio-civil/", views.lesc, name="lesc"),
+    path('directorio/direccion/', views.directorio_direccion, name='directorio_direccion'),
+    path('directorio/planteles/', views.directorio_planteles, name='directorio_planteles'),    
+    path('planilla-detalle/', views.planilla_list, name='planilla_list'),
+    path('planilla-detalle/<int:pk>/detalle/', views.planilla_detalle, name='planilla_detalle'),
 ]
 
 if settings.DEBUG:

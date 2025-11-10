@@ -1,0 +1,207 @@
+{% extends 'planilla/menu.html' %}
+{% block content %}
+
+<style>
+/* Mantener todo en una línea */
+#tablaPlanteles th,
+#tablaPlanteles td {
+    white-space: nowrap !important;
+}
+
+/* Contenedor de la tabla con scroll horizontal */
+.table-wrap {
+    overflow-x: auto;
+    position: relative;
+    padding-bottom: 20px; /* espacio para scrollbar nativa */
+}
+
+/* Tabla puede crecer horizontalmente */
+table.dataTable, #tablaPlanteles {
+    width: max-content !important;
+    min-width: 100% !important;
+}
+
+/* Encabezado sticky */
+table.dataTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    background: #343a40;
+    color: #fff;
+}
+
+/* Botón toggle columnas alineado */
+#toggleColumns {
+    margin-bottom: 10px;
+}
+
+/* Sticky Scroll visible y alineada al contenedor */
+#sticky-scroll {
+    position: fixed;
+    bottom: 0;
+    height: 22px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    z-index: 1080;
+    background: #f1f1f1; /* sólido y visible */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+    border-top: 1px solid #c1c1c1;
+}
+
+/* Elemento interno para definir ancho de la barra */
+#sticky-scroll-inner {
+    height: 1px;
+}
+
+/* Padding inferior para que la sticky no tape contenido */
+body {
+    padding-bottom: 36px;
+}
+
+/* Estilo barra scroll para Webkit */
+#sticky-scroll::-webkit-scrollbar {
+    height: 14px;
+}
+#sticky-scroll::-webkit-scrollbar-track {
+    background: #dcdcdc;
+}
+#sticky-scroll::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 7px;
+    border: 3px solid #dcdcdc;
+}
+#sticky-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: #333;
+}
+</style>
+
+<div class="container-fluid mt-4">
+    <h3 class="text-center mb-3">Directorio de Planteles</h3>
+
+    <div class="text-end mb-2">
+        <button id="toggleColumns" class="btn btn-sm btn-primary">Mostrar/Ocultar Más</button>
+    </div>
+
+    <div class="table-wrap">
+        <table id="tablaPlanteles" class="table table-striped table-bordered table-sm display nowrap" style="width:100%">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>No</th>
+                    <th>Plantel</th>
+                    <th>Teléfono</th>
+                    <th>Teléfono 2</th>
+                    <th>Director</th>
+                    <th>Encargado</th>
+                    <th>Tel. Director</th>
+                    <th>Coord. Adm.</th>
+                    <th>Tel. Adm.</th>
+                    <th>Coord. Académico</th>
+                    <th>Tel. Académico</th>
+                    <th>CCT</th>
+                    <th>Fecha Creación</th>
+                    <th>DOF</th>
+                    <th>Folio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in planteles %}
+                <tr>
+                    <td>{{ p.no }}</td>
+                    <td>{{ p.plantel }}</td>
+                    <td>{{ p.telefono }}</td>
+                    <td>{{ p.telefono_2 }}</td>
+                    <td>{{ p.director }}</td>
+                    <td>{{ p.encargado }}</td>
+                    <td>{{ p.tel_director }}</td>
+                    <td>{{ p.coor_adm }}</td>
+                    <td>{{ p.tel_adm }}</td>
+                    <td>{{ p.coor_aca }}</td>
+                    <td>{{ p.tel_aca }}</td>
+                    <td>{{ p.cct }}</td>
+                    <td>{{ p.fecha_creacion }}</td>
+                    <td>{{ p.dof }}</td>
+                    <td>{{ p.folio }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Sticky scrollbar -->
+<div id="sticky-scroll" aria-hidden="true">
+    <div id="sticky-scroll-inner"></div>
+</div>
+
+<!-- DataTables CSS/JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+<script>
+$(function() {
+    var table = $('#tablaPlanteles').DataTable({
+        paging: false,
+        dom: 'Bfrtip',
+        buttons: ['copy','excel','pdf','print'],
+        language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
+        order: [[0,'asc']],
+        autoWidth: false,
+        columnDefs: [
+            { width: '30px', targets: 0, className: 'text-center' },
+            { width: '300px', targets: 4 },
+            { width: '350px', targets: 7 },
+            { width: '350px', targets: 9 },
+            { width: '400px', targets: 10 },
+            { visible: false, targets: [3,5,11,12,13,14] }
+        ],
+        drawCallback: function() { updateStickyScroller(); }
+    });
+
+    var $tableWrap = $('.table-wrap');
+    var sticky = document.getElementById('sticky-scroll');
+    var stickyInner = document.getElementById('sticky-scroll-inner');
+
+    function updateStickyScroller() {
+        var tbl = document.getElementById('tablaPlanteles');
+        if (!tbl) return;
+        // ancho de la barra igual al contenedor de la tabla
+        sticky.style.width = $tableWrap[0].clientWidth + 'px';
+        stickyInner.style.width = tbl.scrollWidth + 'px';
+        sticky.scrollLeft = $tableWrap[0].scrollLeft;
+    }
+
+    sticky.addEventListener('scroll', function() {
+        $tableWrap[0].scrollLeft = this.scrollLeft;
+    });
+
+    $tableWrap.on('scroll', function() {
+        sticky.scrollLeft = this.scrollLeft;
+    });
+
+    $(window).on('resize', updateStickyScroller);
+    setTimeout(updateStickyScroller, 150);
+
+    // Botón mostrar/ocultar columnas
+    var hiddenCols = [3,5,11,12,13,14];
+    $('#toggleColumns').click(function() {
+        hiddenCols.forEach(function(idx){
+            var col = table.column(idx);
+            col.visible(!col.visible());
+        });
+        setTimeout(updateStickyScroller, 50);
+    });
+});
+</script>
+
+{% endblock %}

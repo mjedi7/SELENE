@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.db.models import Count
 from django.utils import timezone
-from .models import Usuario, Planilla, Adscripcion, Plazas, Directorio, BajasExpedientes, MovimientoPlaza, PersonalAcumulado, ArchivoSubido, ArchivoSubido, Convenio,  Planilla3, Planilla4, PersonalSindicalizado
+from .models import Usuario, Planilla, Adscripcion, Plazas, Directorio, BajasExpedientes, MovimientoPlaza, PersonalAcumulado, ArchivoSubido, ArchivoSubido, Convenio,  Planilla3, Planilla4, PersonalSindicalizado, DirDG, DirPlanteles, PlanillaDetalle
 from django.db import connection
 import csv
 from datetime import datetime
@@ -274,8 +274,23 @@ def estadisticas(request):
     return render(request, 'planilla/estadisticas.html', context)
 
 def directorio(request):
-    directorio = Directorio.objects.all().order_by('id')
-    return render(request, 'planilla/directorio.html', {'directorio': directorio})
+    return render(request, 'planilla/directorio_inicio.html')
+    
+from django.shortcuts import render
+from .models import DirDG
+
+def directorio_direccion(request):
+    registros = DirDG.objects.all().order_by('adscripcion', 'cargo')
+    return render(request, 'planilla/directorio_direccion.html', {'registros': registros})
+   
+    
+#def directorio(request):
+#    directorio = Directorio.objects.all().order_by('id')
+#    return render(request, 'planilla/directorio.html', {'directorio': directorio})
+
+def directorio_planteles(request):
+    planteles = DirPlanteles.objects.all().order_by('no')
+    return render(request, 'planilla/directorio_planteles.html', {'planteles': planteles})
     
 def altas_lista(request):
     # Obtiene la fecha actual
@@ -708,7 +723,10 @@ from django.shortcuts import render
 from django.db import connection
 
 def personal_sindicalizado_view(request):
+    comite_claves = (431, 689, 127, 278, 179, 1208, 945, 1339)
+
     with connection.cursor() as cursor:
+        # Todos los sindicalizados
         cursor.execute("""
             SELECT p.clave, p.nombre, p.departamento, p.puesto, p.fecha_de_ingreso
             FROM planilla3 p
@@ -717,8 +735,19 @@ def personal_sindicalizado_view(request):
         """)
         filas = cursor.fetchall()
 
+        # Solo comité
+        cursor.execute(f"""
+            SELECT p.clave, p.nombre, p.departamento, p.puesto, p.fecha_de_ingreso
+            FROM planilla3 p
+            INNER JOIN personal_sindicalizado s ON p.clave = s.numero
+            WHERE p.clave IN {comite_claves}
+            ORDER BY p.nombre;
+        """)
+        comite = cursor.fetchall()
+
     context = {
         'datos': filas,
+        'comite': comite,
     }
     return render(request, 'planilla/personal_sindicalizado.html', context)
 
@@ -879,7 +908,7 @@ def buscar_quincenas(request):
 def ver_planilla(request):
     trabajadores = Planilla4.objects.all()
     return render(request, "planilla/ver_planilla.html", {"trabajadores": trabajadores})
-    
+
 def comparar_plazas(request):
     zona = request.GET.get("zona")
     denominacion = request.GET.get("denominacion")
@@ -903,54 +932,61 @@ def comparar_plazas(request):
     )
 
     if zona and denominacion:
-        # --- plazas autorizadas (leer y convertir si es posible) ---
+        # Depuración: ver qué llega desde el formulario
+        print("DEBUG zona:", zona, type(zona))
+        print("DEBUG denominacion:", denominacion, type(denominacion))
+
+        # Convertir zona a entero (para Planilla3)
+        try:
+            zona_int = int(zona)
+        except ValueError:
+            zona_int = None
+
+        # Filtro de trabajadores en Planilla3
+        trabajadores_qs = Planilla3.objects.filter(
+            zona=zona_int,
+            puesto=denominacion.strip()
+        )
+
+        # Depuración: verificar si hay resultados
+        print("DEBUG trabajadores encontrados:", trabajadores_qs.count())
+        print("DEBUG ejemplos:", list(trabajadores_qs.values_list('clave', 'puesto', 'zona')[:5]))
+
+        # Contar plazas ocupadas
+        plazas_ocupadas_original = trabajadores_qs.count()
+
+        # Buscar la plaza en la tabla Plazas
         try:
             plaza_info = Plazas.objects.get(
-                zona_economica=zona,
-                denominacion=denominacion
+                zona_economica=str(zona),       # Usa str(zona) si zona_economica es CharField
+                denominacion=denominacion.strip()
             )
+
+            # Convertir a entero de forma segura
             try:
                 plazas_autorizadas = int(plaza_info.plazas or 0)
             except (ValueError, TypeError):
                 plazas_autorizadas = 0
+
+            plazas_ocupadas = plazas_ocupadas_original
+            diferencia = plazas_autorizadas - plazas_ocupadas
+
+            # Mostrar resultados en consola para verificar
+            print("DEBUG plazas_autorizadas:", plazas_autorizadas)
+            print("DEBUG plazas_ocupadas:", plazas_ocupadas)
+            print("DEBUG diferencia:", diferencia)
+
         except Plazas.DoesNotExist:
+            plaza_info = None
             plazas_autorizadas = 0
+            plazas_ocupadas = plazas_ocupadas_original
+            diferencia = -plazas_ocupadas
+            print("DEBUG: No se encontró coincidencia en Plazas.")
 
-        # --- trabajadores en planilla3 para esa zona/puesto ---
-        trabajadores_qs = Planilla3.objects.filter(
-            zona=zona,
-            puesto=denominacion
-        )
-
-        plazas_ocupadas_original = trabajadores_qs.count()
-
-        # --- claves de esos trabajadores ---
-        claves_trabajadores = list(trabajadores_qs.values_list('clave', flat=True))
-
-        # --- buscar comisionados (números) que están en personal_sindicalizado ---
-        comisionados_qs = PersonalSindicalizado.objects.filter(
-            numero__in=claves_trabajadores
-        )
-
-        # lista de claves (enteros) de comisionados para usar en el template
-        comisionados_claves = list(comisionados_qs.values_list('numero', flat=True))
-
-        # obtener los registros completos de trabajadores que son comisionados
-        comisionados_workers = trabajadores_qs.filter(clave__in=comisionados_claves)
-
-        # --- calcular cuántos se restan: excluir claves 945 y 179 ---
-        EXCEPCIONES = [945, 179]
-        comisionados_restados = comisionados_qs.exclude(numero__in=EXCEPCIONES).count()
-
-        # ajustar plazas ocupadas
-        plazas_ocupadas = plazas_ocupadas_original - comisionados_restados
-        if plazas_ocupadas < 0:
-            plazas_ocupadas = 0
-
-        # calcular disponibles
+        # Calcular disponibles (por si no se definió antes)
         disponibles = plazas_autorizadas - plazas_ocupadas
 
-        # asignar lista/qs para mostrar
+        # Asignar lista/qs para mostrar
         trabajadores = trabajadores_qs
 
     context = {
@@ -967,3 +1003,48 @@ def comparar_plazas(request):
     }
 
     return render(request, "planilla/comparar_plazas.html", context)
+
+def lesc(request):
+    return render(request, 'planilla/wo99114.html')
+
+
+def planilla_list(request):
+    trabajadores = PlanillaDetalle.objects.all()
+    return render(request, 'planilla/planilla_detalle.html', {'trabajadores': trabajadores})
+
+def planilla_detalle(request, pk):
+    trabajador = get_object_or_404(PlanillaDetalle, pk=pk)
+    data = {
+        "rfc": trabajador.rfc,
+        "clave": trabajador.clave,
+        "nombre": trabajador.nombre,
+        "departamento": trabajador.departamento,
+        "puesto": trabajador.puesto,
+        "fecha_inicio_rel_laboral": trabajador.fecha_inicio_rel_laboral,
+        "curp": trabajador.curp,
+        "nss": trabajador.nss,
+        "sindicalizado": trabajador.sindicalizado,
+        "activo": trabajador.activo,
+        "baja": trabajador.baja,
+        "quincenas_como_base": trabajador.quincenas_como_base,
+        "nombramiento_si_no": trabajador.nombramiento_si_no,
+        "observaciones": trabajador.observaciones,
+        "categoria_ultimo_nombramiento": trabajador.categoria_ultimo_nombramiento,
+        "fecha_ultimo_nombramiento": trabajador.fecha_ultimo_nombramiento,
+        "firma_ultimo_nombramiento": trabajador.firma_ultimo_nombramiento,
+        "genero": trabajador.genero,
+        "fecha_nacimiento": trabajador.fecha_nacimiento,
+        "num_particular": trabajador.num_particular,
+        "num_telefono": trabajador.num_telefono,
+        "c_estudios": trabajador.c_estudios,
+        "cedula": trabajador.cedula,
+        "universidad": trabajador.universidad,
+        "cedula_validada": trabajador.cedula_validada,
+        "calle": trabajador.calle,
+        "colonia": trabajador.colonia,
+        "ciudad": trabajador.ciudad,
+        "cp": trabajador.cp,
+        "fecha_licencia": trabajador.fecha_licencia,
+        "motivo_licencia": trabajador.motivo_licencia,
+    }
+    return JsonResponse(data)

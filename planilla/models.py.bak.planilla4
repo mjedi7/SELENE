@@ -304,40 +304,4 @@ class DirPlanteles(models.Model):
         db_table = 'dir_planteles'
 
     def __str__(self):
-        return f"{self.plantel}"
-
-class PlanillaDetalle(models.Model):
-    rfc = models.TextField(blank=True, null=True)
-    clave = models.TextField(primary_key=True)  # aquí le decimos a Django que esta es la PK
-    nombre = models.TextField(blank=True, null=True)
-    departamento = models.TextField(blank=True, null=True)
-    puesto = models.TextField(blank=True, null=True)
-    fecha_inicio_rel_laboral = models.TextField(blank=True, null=True)
-    curp = models.TextField(blank=True, null=True)
-    nss = models.TextField(blank=True, null=True)
-    sindicalizado = models.TextField(blank=True, null=True)
-    activo = models.TextField(blank=True, null=True)
-    baja = models.TextField(blank=True, null=True)
-    quincenas_como_base = models.TextField(blank=True, null=True)
-    nombramiento_si_no = models.TextField(blank=True, null=True)
-    observaciones = models.TextField(blank=True, null=True)
-    categoria_ultimo_nombramiento = models.TextField(blank=True, null=True)
-    fecha_ultimo_nombramiento = models.TextField(blank=True, null=True)
-    firma_ultimo_nombramiento = models.TextField(blank=True, null=True)
-    genero = models.TextField(blank=True, null=True)
-    fecha_nacimiento = models.TextField(blank=True, null=True)
-    num_particular = models.TextField(blank=True, null=True)
-    num_telefono = models.TextField(blank=True, null=True)
-    c_estudios = models.TextField(blank=True, null=True)
-    cedula = models.TextField(blank=True, null=True)
-    universidad = models.TextField(blank=True, null=True)
-    cedula_validada = models.TextField(blank=True, null=True)
-    calle = models.TextField(blank=True, null=True)
-    colonia = models.TextField(blank=True, null=True)
-    ciudad = models.TextField(blank=True, null=True)
-    cp = models.TextField(blank=True, null=True)
-    fecha_licencia = models.TextField(blank=True, null=True)
-    motivo_licencia = models.TextField(blank=True, null=True)
-
-    class Meta:
-        db_table = 'planilla4'  # aquí apuntas a tu tabla existente
+        return f"{self.plantel}"       

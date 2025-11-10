@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Análisis Plazas</h2>
+    <h2 class="mb-4 text-center">Análisis Plazas</h2>
 
     <!-- Formulario de selección -->
     <form method="get" class="mb-4">
@@ -40,12 +40,41 @@
                 <h4 class="card-title">{{ denominacion }}</h4>
                 <p class="card-text"><strong>Zona económica:</strong> {{ zona }}</p>
                 <p class="card-text"><strong>Plazas autorizadas:</strong> {{ plazas_autorizadas }}</p>
-                <p class="card-text"><strong>Plazas ocupadas:</strong> {{ plazas_ocupadas }}</p>
-                <p class="card-text"><strong>Disponibles:</strong> {{ disponibles }}</p>
+                <p class="card-text"><strong>Plazas ocupadas (ajustadas):</strong> {{ plazas_ocupadas }}</p>
+                <p class="card-text text-primary"><strong>Disponibles:</strong> {{ disponibles }}</p>
+                <p class="card-text text-warning"><strong>Comisionados restados:</strong> {{ comisionados_restados }}</p>
             </div>
         </div>
 
-        <h5>Trabajadores en esta categoría</h5>
+        <!-- Tabla de comisionados -->
+        {% if comisionados %}
+            <h5 class="mt-4">Personal comisionado al SUTCECyTEV</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-warning">
+                        <tr>
+                            <th>Clave</th>
+                            <th>Nombre</th>
+                            <th>Adscripción</th>
+                            <th>Puesto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in comisionados %}
+                        <tr class="table-warning">
+                            <td>{{ c.clave }}</td>
+                            <td>{{ c.nombre }}</td>
+                            <td>{{ c.adscripcion }}</td>
+                            <td>{{ c.puesto }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        <!-- Tabla de trabajadores -->
+        <h5 class="mt-4">Trabajadores en esta categoría</h5>
         {% if trabajadores %}
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
@@ -53,15 +82,17 @@
                         <tr>
                             <th>Clave</th>
                             <th>Nombre</th>
+                            <th>Adscripción</th>
                             <th>Puesto</th>
                             <th>Zona</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for t in trabajadores %}
-                        <tr>
+                        <tr {% if t.clave in comisionados_claves %}class="table-danger"{% endif %}>
                             <td>{{ t.clave }}</td>
                             <td>{{ t.nombre }}</td>
+                            <td>{{ t.adscripcion }}</td>
                             <td>{{ t.puesto }}</td>
                             <td>{{ t.zona }}</td>
                         </tr>

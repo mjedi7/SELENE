@@ -908,7 +908,7 @@ def buscar_quincenas(request):
 def ver_planilla(request):
     trabajadores = Planilla4.objects.all()
     return render(request, "planilla/ver_planilla.html", {"trabajadores": trabajadores})
-    
+
 def comparar_plazas(request):
     zona = request.GET.get("zona")
     denominacion = request.GET.get("denominacion")
@@ -932,54 +932,61 @@ def comparar_plazas(request):
     )
 
     if zona and denominacion:
-        # --- plazas autorizadas (leer y convertir si es posible) ---
+        # Depuración: ver qué llega desde el formulario
+        print("DEBUG zona:", zona, type(zona))
+        print("DEBUG denominacion:", denominacion, type(denominacion))
+
+        # Convertir zona a entero (para Planilla3)
+        try:
+            zona_int = int(zona)
+        except ValueError:
+            zona_int = None
+
+        # Filtro de trabajadores en Planilla3
+        trabajadores_qs = Planilla3.objects.filter(
+            zona=zona_int,
+            puesto=denominacion.strip()
+        )
+
+        # Depuración: verificar si hay resultados
+        print("DEBUG trabajadores encontrados:", trabajadores_qs.count())
+        print("DEBUG ejemplos:", list(trabajadores_qs.values_list('clave', 'puesto', 'zona')[:5]))
+
+        # Contar plazas ocupadas
+        plazas_ocupadas_original = trabajadores_qs.count()
+
+        # Buscar la plaza en la tabla Plazas
         try:
             plaza_info = Plazas.objects.get(
-                zona_economica=zona,
-                denominacion=denominacion
+                zona_economica=str(zona),       # Usa str(zona) si zona_economica es CharField
+                denominacion=denominacion.strip()
             )
+
+            # Convertir a entero de forma segura
             try:
                 plazas_autorizadas = int(plaza_info.plazas or 0)
             except (ValueError, TypeError):
                 plazas_autorizadas = 0
+
+            plazas_ocupadas = plazas_ocupadas_original
+            diferencia = plazas_autorizadas - plazas_ocupadas
+
+            # Mostrar resultados en consola para verificar
+            print("DEBUG plazas_autorizadas:", plazas_autorizadas)
+            print("DEBUG plazas_ocupadas:", plazas_ocupadas)
+            print("DEBUG diferencia:", diferencia)
+
         except Plazas.DoesNotExist:
+            plaza_info = None
             plazas_autorizadas = 0
+            plazas_ocupadas = plazas_ocupadas_original
+            diferencia = -plazas_ocupadas
+            print("DEBUG: No se encontró coincidencia en Plazas.")
 
-        # --- trabajadores en planilla3 para esa zona/puesto ---
-        trabajadores_qs = Planilla3.objects.filter(
-            zona=zona,
-            puesto=denominacion
-        )
-
-        plazas_ocupadas_original = trabajadores_qs.count()
-
-        # --- claves de esos trabajadores ---
-        claves_trabajadores = list(trabajadores_qs.values_list('clave', flat=True))
-
-        # --- buscar comisionados (números) que están en personal_sindicalizado ---
-        comisionados_qs = PersonalSindicalizado.objects.filter(
-            numero__in=claves_trabajadores
-        )
-
-        # lista de claves (enteros) de comisionados para usar en el template
-        comisionados_claves = list(comisionados_qs.values_list('numero', flat=True))
-
-        # obtener los registros completos de trabajadores que son comisionados
-        comisionados_workers = trabajadores_qs.filter(clave__in=comisionados_claves)
-
-        # --- calcular cuántos se restan: excluir claves 945 y 179 ---
-        EXCEPCIONES = [945, 179]
-        comisionados_restados = comisionados_qs.exclude(numero__in=EXCEPCIONES).count()
-
-        # ajustar plazas ocupadas
-        plazas_ocupadas = plazas_ocupadas_original - comisionados_restados
-        if plazas_ocupadas < 0:
-            plazas_ocupadas = 0
-
-        # calcular disponibles
+        # Calcular disponibles (por si no se definió antes)
         disponibles = plazas_autorizadas - plazas_ocupadas
 
-        # asignar lista/qs para mostrar
+        # Asignar lista/qs para mostrar
         trabajadores = trabajadores_qs
 
     context = {
